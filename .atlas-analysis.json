@@ -1,0 +1,84 @@
+{
+  "projectType": "saas",
+  "projectName": "PZ Packs",
+  "projectDescription": "Simplify the process of installing mods on Project Zomboid dedicated servers with collaborative modpack management.",
+  "theme": "palm",
+  "primaryColor": "#4A7C59",
+  "lightColor": "#6B9E7A",
+  "darkColor": "#2D5A3D",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "authentication"
+            ]
+          },
+          {
+            "group": "Core Features",
+            "pages": [
+              "features/modpacks",
+              "features/mods",
+              "features/server-configuration",
+              "features/team-collaboration"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/importing-from-steam",
+              "guides/exporting-server-files",
+              "guides/managing-permissions"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "api/overview",
+              "api/authentication"
+            ]
+          },
+          {
+            "group": "Endpoints",
+            "pages": [
+              "api/modpacks",
+              "api/mods",
+              "api/members",
+              "api/notifications"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Create and manage modpacks for Project Zomboid servers",
+    "Import mods directly from Steam Workshop",
+    "Export server configuration files (41x and 42x versions)",
+    "Team collaboration with permission-based access",
+    "Public modpack sharing and discovery",
+    "Automatic mod metadata synchronization"
+  ],
+  "publicApiSurface": [
+    "GET /modpacks/public - List all public modpacks",
+    "GET /modpacks/my - List user's modpacks",
+    "POST /modpacks - Create a new modpack",
+    "POST /modpacks/:id/import - Import mods from Steam Collection",
+    "POST /modpacks/:id/server-file - Generate server configuration file",
+    "GET /mods - List all mods with filters",
+    "GET /mods/:id - Get mod details",
+    "GET /mods/workshop/:workshopId - Get mod by Workshop ID",
+    "POST /modpacks/:id/members - Add team member to modpack",
+    "DELETE /modpacks/:id/members - Remove team member"
+  ]
+}
