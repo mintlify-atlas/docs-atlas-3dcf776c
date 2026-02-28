@@ -1,0 +1,365 @@
+---
+title: Authentication
+description: How to authenticate requests to the PZ Packs API
+---
+
+## Overview
+
+The PZ Packs API uses [Better Auth](https://www.better-auth.com) for authentication. API requests are authenticated using session-based cookies with Discord OAuth2 as the authentication provider.
+
+## Authentication Flow
+
+### 1. User Authentication
+
+Users authenticate through the web application using Discord OAuth2:
+
+```
+GET /auth/discord
+```
+
+This redirects to Discord for authorization. After successful authentication, Better Auth creates a session and sets a secure, HTTP-only cookie.
+
+### 2. Session Cookie
+
+Upon successful authentication, a session cookie is set:
+
+```
+better-auth.session_token=<token_value>
+```
+
+**Cookie properties:**
+- **Name:** `better-auth.session_token`
+- **HTTP Only:** Yes (not accessible via JavaScript)
+- **Secure:** Yes (HTTPS only in production)
+- **SameSite:** Set based on CORS configuration
+- **Max Age:** 5 minutes (with refresh mechanism)
+
+<Info>
+Better Auth implements session caching with a 5-minute cache duration to reduce database queries while maintaining security.
+</Info>
+
+## Making Authenticated Requests
+
+### Browser Requests
+
+When making requests from a browser (same origin or with CORS credentials), cookies are automatically included:
+
+```javascript
+fetch('http://localhost:3001/modpacks/my', {
+  method: 'GET',
+  credentials: 'include', // Important: include cookies
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
+  .then(response => response.json())
+  .then(data => console.log(data));
+```
+
+### cURL Requests
+
+For testing with cURL, include the session cookie:
+
+```bash
+curl -X GET http://localhost:3001/modpacks/my \
+  -H "Content-Type: application/json" \
+  -H "Cookie: better-auth.session_token=YOUR_SESSION_TOKEN" \
+  --cookie-jar cookies.txt \
+  --cookie cookies.txt
+```
+
+<Note>
+You can extract your session token from browser DevTools > Application > Cookies or by inspecting the Set-Cookie header after authentication.
+</Note>
+
+### Programmatic Access
+
+For applications consuming the API, maintain the session cookie across requests:
+
+```javascript
+import { createAuthClient } from '@org/auth/client';
+
+const client = createAuthClient({
+  baseURL: 'http://localhost:3001',
+  credentials: 'include'
+});
+
+// Client automatically handles cookie management
+const response = await client.fetch('/modpacks/my');
+```
+
+## Session Management
+
+Better Auth handles session lifecycle automatically:
+
+### Session Creation
+
+Sessions are created upon successful Discord OAuth authentication:
+
+```
+POST /auth/discord/callback
+```
+
+### Session Validation
+
+The API validates sessions on protected endpoints using the `auth` macro:
+
+```typescript
+{
+  auth: true,
+  permission: { resource: 'modpack', action: 'read' }
+}
+```
+
+Validation process:
+1. Extract session token from cookie
+2. Validate token against database/cache
+3. Load user data and role
+4. Check permissions if specified
+
+### Session Expiration
+
+Sessions use cookie caching with automatic refresh:
+- **Cache Duration:** 5 minutes
+- **Refresh:** Automatic on valid requests
+- **Expiration:** Handled by Better Auth
+
+### Getting Current Session
+
+Retrieve the current authenticated user:
+
+```bash
+curl -X GET http://localhost:3001/auth/session \
+  -H "Cookie: better-auth.session_token=YOUR_SESSION_TOKEN"
+```
+
+**Response:**
+
+```json
+{
+  "session": {
+    "id": "session-id",
+    "userId": "user-id",
+    "expiresAt": "2026-03-01T12:00:00Z"
+  },
+  "user": {
+    "id": "user-id",
+    "name": "Discord User",
+    "email": "user@example.com",
+    "role": "user",
+    "image": "https://cdn.discordapp.com/avatars/..."
+  }
+}
+```
+
+### Logout
+
+Invalidate the current session:
+
+```bash
+curl -X POST http://localhost:3001/auth/sign-out \
+  -H "Cookie: better-auth.session_token=YOUR_SESSION_TOKEN"
+```
+
+This removes the session from the database and clears the cookie.
+
+## Authorization and Permissions
+
+### Permission Checking
+
+Protected endpoints specify required permissions:
+
+```typescript
+{
+  auth: true,
+  permission: { resource: 'modpack', action: 'create' }
+}
+```
+
+The API checks if the authenticated user's role includes the required permission.
+
+### Role-Based Access
+
+**User Role:**
+- Standard modpack operations (create, read, update, delete)
+- Mod management within own modpacks
+- Member management for own modpacks
+
+**Admin Role:**
+- All user permissions
+- Global mod updates (`mod:update-all`)
+- Admin panel access (`admin:access`)
+
+### Resource-Level Authorization
+
+Beyond role permissions, controllers enforce resource-level rules:
+
+**Modpack ownership:**
+- Only owners can update or archive modpacks
+- Only owners can manage members
+- Owners and members can add/remove mods
+
+**Example authorization check:**
+
+```typescript
+const isOwner = modpack.owner === user.id;
+const isMember = modpack.members.some(m => m.userId === user.id);
+
+if (!isOwner && !isMember && !modpack.isPublic) {
+  return status(403, { error: { message: 'Access denied' } });
+}
+```
+
+## Error Responses
+
+### 401 Unauthorized
+
+Returned when no valid session is found:
+
+```json
+{
+  "message": "Unauthorized"
+}
+```
+
+**Common causes:**
+- Missing session cookie
+- Expired or invalid session token
+- Session not found in database
+
+### 403 Forbidden
+
+Returned when authenticated but lacking permission:
+
+```json
+{
+  "message": "Do not have permission"
+}
+```
+
+**Common causes:**
+- User role lacks required permission
+- Not the owner of the resource (for owner-only actions)
+- Not a member of the modpack (for member actions)
+
+## CORS and Credentials
+
+The API is configured to support cross-origin requests with credentials:
+
+```typescript
+cors({
+  origin: env.ORIGIN_ALLOWED,  // Whitelist via environment variable
+  credentials: true,            // Allow cookies
+  allowedHeaders: ['Content-Type', 'Authorization']
+})
+```
+
+### Allowed Origins
+
+Configure trusted origins in the environment:
+
+```bash
+ORIGIN_ALLOWED="http://localhost:3000,https://pzpacks.com"
+```
+
+<Warning>
+Always include credentials when making cross-origin requests, otherwise cookies won't be sent:
+
+```javascript
+fetch(url, { credentials: 'include' })
+```
+</Warning>
+
+## Security Considerations
+
+### Session Security
+
+- **HTTP-Only Cookies:** Prevents XSS attacks
+- **Secure Flag:** Ensures HTTPS-only transmission in production
+- **SameSite:** Protects against CSRF attacks
+- **Database-Backed:** Sessions stored in PostgreSQL with cache layer
+
+### Best Practices
+
+1. **Never expose session tokens** in client-side code or logs
+2. **Use HTTPS** in production to protect cookies in transit
+3. **Implement CSRF protection** if building forms that modify data
+4. **Rotate secrets** regularly for Discord OAuth credentials
+5. **Monitor sessions** for suspicious activity
+
+### Environment Variables
+
+Required authentication configuration:
+
+```bash
+# Discord OAuth
+DISCORD_CLIENT_ID="your-client-id"
+DISCORD_CLIENT_SECRET="your-client-secret"
+
+# CORS
+ORIGIN_ALLOWED="http://localhost:3000,https://pzpacks.com"
+
+# Database (for session storage)
+DATABASE_URL="postgresql://..."
+SECONDARY_DATABASE_URL="redis://..."  # For session caching
+```
+
+## Better Auth Endpoints
+
+Better Auth provides these endpoints automatically:
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/auth/discord` | GET | Initiate Discord OAuth flow |
+| `/auth/discord/callback` | GET | Handle OAuth callback |
+| `/auth/session` | GET | Get current session |
+| `/auth/sign-out` | POST | Sign out and clear session |
+
+<Info>
+For a complete list of Better Auth endpoints, see the [Better Auth documentation](https://www.better-auth.com) or the OpenAPI docs at `/docs` in development mode.
+</Info>
+
+## Testing Authentication
+
+### 1. Authenticate via Browser
+
+1. Navigate to `http://localhost:3000/auth/discord`
+2. Complete Discord OAuth flow
+3. Open DevTools > Application > Cookies
+4. Copy the `better-auth.session_token` value
+
+### 2. Use Token in API Requests
+
+```bash
+# Store token in variable
+SESSION_TOKEN="your-token-here"
+
+# Make authenticated request
+curl -X GET http://localhost:3001/modpacks/my \
+  -H "Cookie: better-auth.session_token=$SESSION_TOKEN"
+```
+
+### 3. Test Permission Levels
+
+```bash
+# User action (should succeed for users)
+curl -X POST http://localhost:3001/modpacks \
+  -H "Cookie: better-auth.session_token=$SESSION_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Test Pack", "isPublic": true}'
+
+# Admin action (requires admin role)
+curl -X POST http://localhost:3001/mods/update-all \
+  -H "Cookie: better-auth.session_token=$SESSION_TOKEN"
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="API Overview" icon="book" href="/api/overview">
+    Learn about API structure and response formats
+  </Card>
+  <Card title="Modpack Endpoints" icon="code" href="/api/modpacks">
+    Explore modpack API endpoints
+  </Card>
+</CardGroup>

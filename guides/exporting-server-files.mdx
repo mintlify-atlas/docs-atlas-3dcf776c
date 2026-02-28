@@ -1,0 +1,368 @@
+---
+title: Exporting Server Configuration Files
+description: Generate and download server configuration files for your Project Zomboid dedicated server
+---
+
+Export your modpack as a server configuration file that's ready to use with Project Zomboid dedicated servers. This guide covers version selection, export configuration, downloading files, and installation on your server.
+
+## Overview
+
+PZ Packs generates server configuration files containing three critical sections:
+- **Mods** - Mod IDs in the correct format for your PZ version
+- **WorkshopItems** - Steam Workshop IDs for automatic downloading
+- **Map** - Custom map folders plus default maps
+
+These files can be directly added to your dedicated server configuration to load all mods from your modpack.
+
+<Note>
+Export files are generated in the background and are user-specific. Your export configuration (mod order, variant selection) is saved separately from other team members.
+</Note>
+
+## Choosing a Project Zomboid Version
+
+<Steps>
+  <Step title="Select your server version">
+    PZ Packs supports two Project Zomboid versions:
+    
+    - **Build 42.x** - Latest unstable/beta branch (recommended for new servers)
+    - **Build 41.x** - Stable branch (for established servers)
+    
+    The version you select determines the mod ID format in the generated file.
+  </Step>
+
+  <Step title="Understand format differences">
+    **Build 42.x format:**
+    ```ini
+    Mods=\ModID1;\ModID2;\ModID3
+    ```
+    
+    **Build 41.x format:**
+    ```ini
+    Mods=ModID1;ModID2;ModID3
+    ```
+    
+    The only difference is the backslash prefix (`\`) required in Build 42.x.
+  </Step>
+
+  <Step title="Match your server version">
+    <Warning>
+    Choose the version that matches your dedicated server. Using the wrong format will prevent mods from loading correctly.
+    </Warning>
+  </Step>
+</Steps>
+
+## Configuring Export Settings
+
+Before exporting, you can customize how mods are included in your server file.
+
+### Mod Load Order
+
+Mod order can affect gameplay and compatibility:
+
+<Steps>
+  <Step title="Set your preferred load order">
+    Configure `modsOrder` to specify the exact sequence mods should load. This is saved in your personal export configuration.
+    
+    ```json
+    {
+      "modsOrder": ["mod-id-1", "mod-id-2", "mod-id-3"]
+    }
+    ```
+  </Step>
+
+  <Step title="Order importance">
+    - Load order matters for mods that override similar game files
+    - Map mods typically load first
+    - Dependency mods should load before mods that require them
+    - PZ Packs respects your configured order in the generated file
+  </Step>
+</Steps>
+
+### Selecting Mod Variants
+
+Some Workshop items contain multiple mod IDs (variants or optional components):
+
+<Steps>
+  <Step title="Review mods with multiple variants">
+    Mods with multiple Steam Mod IDs appear with checkboxes or selection options in the export configuration.
+  </Step>
+
+  <Step title="Configure variant selection">
+    Use the `modConfig` setting to choose which variants to include:
+    
+    ```json
+    {
+      "modConfig": {
+        "mod-id-123": {
+          "selectedSteamModIds": ["variant1", "variant2"]
+        }
+      }
+    }
+    ```
+    
+    Only the selected variants will appear in the exported file.
+  </Step>
+
+  <Step title="Exclude mods entirely">
+    To skip a mod completely, deselect all its variants:
+    
+    ```json
+    {
+      "modConfig": {
+        "mod-id-456": {
+          "selectedSteamModIds": []
+        }
+      }
+    }
+    ```
+    
+    This mod won't appear in `Mods=`, `WorkshopItems=`, or `Map=` sections.
+  </Step>
+</Steps>
+
+### Saving Export Configuration
+
+Your export configuration is saved per user and per modpack:
+
+- Configuration persists between exports
+- Changes only affect your exports, not other team members
+- Modpack owner can set default configuration for all members
+
+<Tip>
+Save your export configuration after adjusting mod order or variants. This ensures consistent exports every time without reconfiguring.
+</Tip>
+
+## Requesting a Server File Export
+
+<Steps>
+  <Step title="Navigate to the export dialog">
+    On your modpack page, click the "Export" or "Download Server File" button.
+  </Step>
+
+  <Step title="Select Project Zomboid version">
+    Choose between Build 42.x or Build 41.x from the version dropdown.
+  </Step>
+
+  <Step title="Submit export request">
+    Click "Export" to queue the file generation.
+    
+    The system will:
+    - Create an export request in the database
+    - Add a background job to generate the file
+    - Return an export ID for tracking
+  </Step>
+
+  <Step title="Wait for generation">
+    File generation typically takes a few seconds. Large modpacks (100+ mods) may take longer.
+    
+    Status updates:
+    - **Pending** - Export is queued or generating
+    - **Completed** - File is ready for download
+    - **Failed** - An error occurred during generation
+  </Step>
+</Steps>
+
+## Understanding the Generated File
+
+The exported file contains three sections:
+
+### Mods Section
+
+Lists all mod IDs in the format appropriate for your selected version:
+
+```ini
+Mods=\ModID1;\ModID2;\ModID3
+```
+
+- Includes selected variants only
+- Duplicates are automatically removed
+- Order matches your `modsOrder` configuration
+
+### WorkshopItems Section
+
+Lists Steam Workshop IDs for automatic mod downloading:
+
+```ini
+WorkshopItems=123456789;987654321;555555555
+```
+
+- Contains Workshop IDs from all included mods
+- Used by the server to auto-download mods from Steam
+- Duplicates are automatically removed
+
+### Map Section
+
+Includes custom map folders plus the default Muldraugh map:
+
+```ini
+Map=CustomMap1;CustomMap2;Muldraugh, KY
+```
+
+- Automatically includes `Muldraugh, KY` as the default spawn
+- Custom map folders are extracted from mod metadata
+- Only includes maps from active, selected mods
+
+<Note>
+The default map "Muldraugh, KY" is always included. Remove it manually if you want a custom map-only server.
+</Note>
+
+## Downloading the Server File
+
+<Steps>
+  <Step title="Wait for completion">
+    When the export status shows "Completed", the download button becomes available.
+  </Step>
+
+  <Step title="Download the file">
+    Click the download button to retrieve your server configuration file.
+    
+    The file is a plain text `.ini` file containing the three configuration sections.
+  </Step>
+
+  <Step title="Verify file contents">
+    Open the file in a text editor and verify:
+    - All expected mods are listed
+    - The mod ID format matches your server version (backslashes for 42.x)
+    - Workshop IDs are present
+    - Map sections look correct
+  </Step>
+</Steps>
+
+## Installing on Your Project Zomboid Server
+
+<Steps>
+  <Step title="Locate your server configuration file">
+    On your dedicated server, find the server configuration file:
+    
+    **Windows:**
+    ```
+    C:\Users\YourUser\Zomboid\Server\ServerName.ini
+    ```
+    
+    **Linux:**
+    ```
+    ~/.config/ProjectZomboid/Server/ServerName.ini
+    ```
+  </Step>
+
+  <Step title="Backup existing configuration">
+    Before making changes, create a backup:
+    
+    ```bash
+    cp ServerName.ini ServerName.ini.backup
+    ```
+  </Step>
+
+  <Step title="Update configuration sections">
+    Open your server's `.ini` file and find these lines:
+    
+    ```ini
+    Mods=
+    Map=
+    WorkshopItems=
+    ```
+    
+    Replace them with the values from your exported file.
+  </Step>
+
+  <Step title="Restart the server">
+    Restart your Project Zomboid dedicated server to load the new mods.
+    
+    On first launch:
+    - Server downloads all Workshop items from Steam
+    - This can take several minutes for large mod lists
+    - Monitor server logs for download progress
+  </Step>
+
+  <Step title="Verify mods loaded">
+    Check your server logs for:
+    
+    ```
+    Loaded mod: ModID1
+    Loaded mod: ModID2
+    ...
+    ```
+    
+    All mods from your export should appear as loaded.
+  </Step>
+</Steps>
+
+<Warning>
+If any mods fail to load, check:
+- Workshop items downloaded successfully
+- Mod IDs match the format for your server version
+- No conflicting mods in the list
+- Server version matches the export version (41.x or 42.x)
+</Warning>
+
+## Troubleshooting Common Issues
+
+### Mods Not Loading
+
+**Issue:** Server starts but mods don't load
+
+**Solutions:**
+- Verify the `Mods=` format matches your server version
+- Build 42.x requires backslash prefix: `\ModID`
+- Build 41.x has no prefix: `ModID`
+- Check that Workshop items downloaded (look in server logs)
+
+### Workshop Download Failures
+
+**Issue:** Some Workshop items fail to download
+
+**Solutions:**
+- Verify your server has Steam Workshop access enabled
+- Check if the Workshop item was removed from Steam
+- Try manually subscribing to the Workshop item
+- Remove the problematic Workshop ID from the config
+
+### Map Not Loading
+
+**Issue:** Custom maps don't appear in-game
+
+**Solutions:**
+- Ensure map mods are in both `Mods=` and `WorkshopItems=`
+- Verify the map folder name in `Map=` is correct
+- Some maps require specific load order - try loading them first
+- Check mod description for special installation instructions
+
+### Export Fails
+
+**Issue:** Export status shows "Failed"
+
+**Solutions:**
+- Try exporting again (temporary server issue)
+- Verify all mods in the modpack are valid
+- Check for mods with missing metadata
+- Contact support if the issue persists
+
+## Best Practices
+
+<Steps>
+  <Step title="Regular exports">
+    Re-export whenever you add or remove mods from your modpack to keep your server in sync.
+  </Step>
+
+  <Step title="Test before production">
+    Test exported configurations on a development server before deploying to production.
+  </Step>
+
+  <Step title="Version consistency">
+    Keep your server version and export version in sync. Don't mix 41.x exports with 42.x servers.
+  </Step>
+
+  <Step title="Document custom changes">
+    If you manually edit the exported file, document your changes so you can reapply them after future exports.
+  </Step>
+
+  <Step title="Share with team">
+    Team members can export the same modpack with their own configurations. Coordinate load order for consistency.
+  </Step>
+</Steps>
+
+## Related Resources
+
+- [Importing from Steam](/guides/importing-from-steam) - Add mods to your modpack from Steam Workshop
+- [Managing Permissions](/guides/managing-permissions) - Control who can modify and export your modpack
+- [API Reference: Export Server File](/api-reference/modpacks/export) - API documentation for exports

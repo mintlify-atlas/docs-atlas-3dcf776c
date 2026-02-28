@@ -1,0 +1,411 @@
+---
+title: Managing Team Permissions
+description: Add team members and control permissions for collaborative modpack management
+---
+
+Collaborate on modpacks with your team by adding members and configuring their permissions. This guide covers the permission system, adding and removing members, and best practices for team modpacks.
+
+## Understanding the Permission Model
+
+PZ Packs uses a flexible permission system for modpack collaboration:
+
+### Ownership vs Membership
+
+- **Owner** - The user who created the modpack
+  - Full control over all modpack settings
+  - Can add and remove members
+  - Can archive/delete the modpack
+  - Cannot be removed or changed
+
+- **Members** - Users invited to collaborate
+  - Permissions granted by owner
+  - Can be added or removed by owner
+  - Access levels determined by permission array
+
+### Permission Array Structure
+
+Permissions are stored as an array of strings, allowing flexible and granular access control:
+
+```json
+{
+  "permission": ["read", "write", "export"]
+}
+```
+
+Each member has their own set of permissions configured by the modpack owner.
+
+<Note>
+The current implementation requires at least one permission when adding a member. Empty permission arrays are not allowed.
+</Note>
+
+## Permission Types
+
+While the system is flexible, common permission patterns include:
+
+### Read Access
+- View modpack details
+- See mod list
+- View other members (if modpack is private)
+
+Typical permission: `["read"]`
+
+### Write Access
+- Add and remove mods
+- Import from Steam Workshop
+- Modify modpack metadata
+- Includes read access implicitly
+
+Typical permission: `["read", "write"]`
+
+### Export Access
+- Generate server configuration files
+- Configure personal export settings
+- Download export files
+
+Typical permission: `["read", "export"]`
+
+### Full Collaboration
+- All read, write, and export permissions
+- Cannot add/remove members (owner only)
+- Cannot archive modpack (owner only)
+
+Typical permission: `["read", "write", "export"]`
+
+<Warning>
+Only the modpack owner can add or remove members. Members cannot invite other users, even with write permissions.
+</Warning>
+
+## Adding Team Members
+
+<Steps>
+  <Step title="Verify you're the owner">
+    Only the modpack owner can add members. If you try to add a member to a modpack you don't own, you'll receive:
+    
+    <Warning>
+    "Only the owner can add members to this modpack"
+    </Warning>
+  </Step>
+
+  <Step title="Open the add member dialog">
+    On your modpack page, click "Add Member" or the team management button.
+  </Step>
+
+  <Step title="Enter the user's email">
+    Type the email address of the user you want to invite:
+    
+    ```
+    user@example.com
+    ```
+    
+    The email must:
+    - Be a valid email format
+    - Belong to an existing PZ Packs user
+    - Not already be a member of this modpack
+  </Step>
+
+  <Step title="Select permissions">
+    Choose which permissions to grant:
+    
+    - For viewers: `["read"]`
+    - For contributors: `["read", "write"]`
+    - For server managers: `["read", "export"]`
+    - For full collaborators: `["read", "write", "export"]`
+    
+    At least one permission is required.
+  </Step>
+
+  <Step title="Add the member">
+    Click "Add Member" to send the invitation.
+    
+    The user is immediately added and can access the modpack based on their permissions.
+  </Step>
+</Steps>
+
+### Adding Members - Common Scenarios
+
+**User not found:**
+```json
+{
+  "error": {
+    "message": "User not found with this email"
+  }
+}
+```
+The email doesn't match any PZ Packs account. Ask the user to sign up first.
+
+**Already a member:**
+```json
+{
+  "error": {
+    "message": "User is already a member of this modpack"
+  }
+}
+```
+This user is already on the team. Update their permissions instead of adding them again.
+
+**Invalid email:**
+```json
+{
+  "error": {
+    "message": "Invalid email format"
+  }
+}
+```
+Check the email address for typos.
+
+## Viewing Team Members
+
+All team members and their roles are visible:
+
+<Steps>
+  <Step title="Access the members list">
+    On the modpack page, view the "Team" or "Members" section.
+  </Step>
+
+  <Step title="Review member information">
+    For each member, you can see:
+    - User name and avatar
+    - Email address
+    - Assigned permissions
+    - Join date
+    - Active status
+  </Step>
+
+  <Step title="Identify the owner">
+    The modpack owner is displayed separately or with an "Owner" badge.
+  </Step>
+</Steps>
+
+### Public vs Private Modpacks
+
+- **Public modpacks** - Members list is visible to everyone
+- **Private modpacks** - Members list only visible to owner and members
+
+## Removing Team Members
+
+<Steps>
+  <Step title="Verify you're the owner">
+    Only the modpack owner can remove members.
+    
+    <Warning>
+    "Only the owner can remove members from this modpack"
+    </Warning>
+  </Step>
+
+  <Step title="Select the member to remove">
+    On the members list, find the user you want to remove and click the remove button or icon.
+  </Step>
+
+  <Step title="Confirm removal">
+    A confirmation dialog appears:
+    
+    "Are you sure you want to remove **[User Name]** from this modpack?"
+    
+    This action:
+    - Immediately revokes their access
+    - Removes them from the members list
+    - Cannot be undone (you must re-invite them)
+  </Step>
+
+  <Step title="Complete the removal">
+    Click "Remove" to confirm.
+    
+    Success message:
+    ```json
+    {
+      "message": "Member removed successfully"
+    }
+    ```
+  </Step>
+</Steps>
+
+<Note>
+Removing a member doesn't delete their personal export configurations. If you re-add them later, their previous export settings may still exist.
+</Note>
+
+## Permission Checks in Action
+
+Here's how permissions are validated for common operations:
+
+### Importing Mods from Steam
+
+When a user tries to import:
+
+1. **Check if modpack exists** - Returns 404 if not found
+2. **Check if modpack is active** - Archived modpacks cannot be modified
+3. **Check ownership** - Is the user the owner?
+4. **Check membership** - If not owner, is the user an active member?
+5. **Deny if neither** - "You do not have permission to edit this modpack"
+
+From the controller at `apps/api/src/domain/modpack/controllers/import-modpack.controller.ts:39-59`:
+
+```typescript
+const isOwner = modpack.owner === user.id
+let isMember = false
+
+if (!isOwner) {
+  const member = await this.modpackMemberRepository.findMember(
+    modpackId,
+    user.id,
+  )
+  if (member?.isActive) {
+    isMember = true
+  }
+}
+
+if (!isOwner && !isMember) {
+  return new ApiResponse(
+    {
+      error: { message: 'You do not have permission to edit this modpack' },
+    },
+    403,
+  )
+}
+```
+
+### Adding/Removing Members
+
+Only the owner can modify team membership:
+
+```typescript
+if (modpack.owner !== user.id) {
+  return new ApiResponse(
+    {
+      error: {
+        message: 'Only the owner can add members to this modpack',
+      },
+    },
+    403,
+  )
+}
+```
+
+From `apps/api/src/domain/modpack/controler/add-member.ts:35-44`
+
+### Viewing Modpack Details
+
+Public modpacks are visible to everyone. Private modpacks require ownership or membership.
+
+<Tip>
+Permissions are checked on the backend for security. Frontend UI may hide buttons for actions users can't perform, but the API always validates permissions.
+</Tip>
+
+## Best Practices for Team Modpacks
+
+<Steps>
+  <Step title="Define clear roles">
+    Decide who needs which permissions:
+    
+    - **Viewers** - `["read"]` - Teammates who just need to see the mod list
+    - **Curators** - `["read", "write"]` - Members who add/remove mods
+    - **Server Admins** - `["read", "export"]` - Those who deploy to servers
+    - **Co-Owners** - `["read", "write", "export"]` - Full collaborators
+  </Step>
+
+  <Step title="Use descriptive modpack names">
+    For team projects, include the team or server name:
+    
+    - "[Clan] Official Server Modpack"
+    - "Community Build 42 Collection"
+    - "[Team Name] Event Mods"
+  </Step>
+
+  <Step title="Communicate changes">
+    When adding or removing mods:
+    
+    - Notify team members of major changes
+    - Document why mods were added/removed
+    - Coordinate before importing large collections
+  </Step>
+
+  <Step title="Regular audits">
+    Periodically review:
+    
+    - Who has access to the modpack
+    - Whether permissions are still appropriate
+    - Remove inactive members
+  </Step>
+
+  <Step title="Separate configs for different servers">
+    If running multiple servers:
+    
+    - Create separate modpacks for each server
+    - Or use personal export configurations for different deployments
+    - Don't try to manage multiple server configs in one modpack
+  </Step>
+
+  <Step title="Backup before major changes">
+    Before large imports or restructuring:
+    
+    - Export your current server file as backup
+    - Document the current mod list
+    - Test changes on a development server first
+  </Step>
+</Steps>
+
+## Advanced: Permission Extensibility
+
+The permission system uses an array structure for future extensibility:
+
+```typescript
+permission: text('permission').array().notNull()
+```
+
+This design allows for:
+
+- Custom permission strings
+- Fine-grained access control
+- Future features without schema changes
+- Role-based templates
+
+<Note>
+While the system supports custom permissions, the current API validates permissions based on ownership and membership status. Additional permission types may be added in future updates.
+</Note>
+
+## Troubleshooting
+
+### Can't Add Member
+
+**Problem:** Add member button is disabled or missing
+
+**Solution:**
+- Verify you're the modpack owner
+- Check that the modpack is active (not archived)
+- Ensure you're logged in
+
+### Member Can't Import Mods
+
+**Problem:** Member receives permission error when importing
+
+**Solution:**
+- Verify the member is listed in the members table
+- Check that their `isActive` status is `true`
+- Confirm the modpack itself is active
+- Re-add the member if their membership is inactive
+
+### Permission Errors After Adding Member
+
+**Problem:** Newly added member still gets permission errors
+
+**Solution:**
+- Have the member log out and back in
+- Check that the member was added successfully (view members list)
+- Verify the permission array is not empty
+- Try removing and re-adding the member
+
+### Can't Remove Member
+
+**Problem:** Remove button doesn't work or shows error
+
+**Solution:**
+- You can only remove members, not the owner
+- Verify you're the modpack owner
+- Check if the member is already removed (refresh the page)
+- Ensure the member exists in the database
+
+## Related Resources
+
+- [Importing from Steam](/guides/importing-from-steam) - Members with write access can import mods
+- [Exporting Server Files](/guides/exporting-server-files) - Each member can configure their own exports
+- [API Reference: Add Member](/api-reference/modpacks/members/add) - API endpoint for adding members
+- [API Reference: Remove Member](/api-reference/modpacks/members/remove) - API endpoint for removing members

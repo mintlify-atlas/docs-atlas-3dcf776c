@@ -1,0 +1,404 @@
+---
+title: Server Configuration Export
+description: Generate and download server configuration files for Project Zomboid servers
+icon: download
+---
+
+# Server Configuration Export
+
+PZ Packs generates server configuration files that you can directly use with your Project Zomboid dedicated server. The export system handles mod IDs, workshop items, and map folders automatically based on your modpack configuration.
+
+## Overview
+
+The server file export feature generates configuration snippets compatible with Project Zomboid server INI files. These files contain the properly formatted mod lists, workshop IDs, and map configurations needed to run your modpack on a server.
+
+<CardGroup cols={2}>
+  <Card title="Build Support" icon="wrench">
+    Export files for both Build 41.x and Build 42.x with correct formatting for each version.
+  </Card>
+  
+  <Card title="Custom Configuration" icon="sliders">
+    Save personalized export configurations including mod order and selected Steam Mod IDs.
+  </Card>
+  
+  <Card title="Background Processing" icon="spinner">
+    Large exports are processed in the background, allowing you to continue working.
+  </Card>
+  
+  <Card title="Direct Download" icon="file-arrow-down">
+    Download ready-to-use configuration files that can be copied into your server settings.
+  </Card>
+</CardGroup>
+
+## Export Configuration Options
+
+Before exporting, you can configure how your modpack is exported.
+
+### Build Version Selection
+
+Project Zomboid Build 41.x and 42.x use different mod ID formats:
+
+<Tabs>
+  <Tab title="Build 42.x">
+    **Modern Format** (recommended for new servers)
+    
+    - Mod IDs are prefixed with a backslash: `\ModID`
+    - Format: `Mods=\ModID1;\ModID2;\ModID3`
+    
+    This is the current stable format for Build 42 and later.
+  </Tab>
+  
+  <Tab title="Build 41.x">
+    **Legacy Format**
+    
+    - Mod IDs without prefix: `ModID`
+    - Format: `Mods=ModID1;ModID2;ModID3`
+    
+    Use this format for older servers running Build 41.x.
+  </Tab>
+</Tabs>
+
+<Warning>
+  Using the wrong build format will prevent mods from loading on your server. Always select the version matching your Project Zomboid server.
+</Warning>
+
+### Mod Order Configuration
+
+The order of mods in the export file affects how they load on the server:
+
+1. Navigate to your modpack details page
+2. Click "Reorder & Configure Export"
+3. Arrange mods in the desired load order
+4. Save the configuration
+
+<Info>
+  Export configurations are saved per user. This allows team members to maintain their own preferred export settings while working on the same modpack.
+</Info>
+
+### Steam Mod ID Selection
+
+Mods with multiple Steam Mod IDs allow you to select which components to include:
+
+<Steps>
+  <Step title="Open Configuration Interface">
+    Click "Reorder & Configure Export" from the modpack page.
+  </Step>
+  
+  <Step title="Review Mods with Multiple IDs">
+    Mods with multiple Steam Mod IDs will show checkboxes for each component.
+  </Step>
+  
+  <Step title="Select Components">
+    Check or uncheck Steam Mod IDs to include/exclude specific components.
+  </Step>
+  
+  <Step title="Save Configuration">
+    Click "Save" to persist your selections.
+  </Step>
+</Steps>
+
+<Note>
+  If you deselect all Steam Mod IDs for a mod, that mod will be completely excluded from the export file.
+</Note>
+
+## Requesting a Server File Export
+
+Generate a server configuration file for your modpack.
+
+<Steps>
+  <Step title="Navigate to Your Modpack">
+    Open the modpack details page for the modpack you want to export.
+  </Step>
+  
+  <Step title="Click Export">
+    Click the "Export" or "Export Server File" button.
+  </Step>
+  
+  <Step title="Select Build Version">
+    Choose between:
+    - **Build 42.x** (modern format with backslash prefix)
+    - **Build 41.x** (legacy format)
+  </Step>
+  
+  <Step title="Request Generation">
+    Click "Export" to create the server file. The system will:
+    - Queue the export job
+    - Process your modpack's mods in the configured order
+    - Apply your saved export configuration
+    - Generate the formatted configuration file
+  </Step>
+  
+  <Step title="Monitor Status">
+    The export request status will show:
+    - **Pending**: Being processed
+    - **Completed**: Ready to download
+    - **Failed**: An error occurred
+  </Step>
+</Steps>
+
+### Export Processing
+
+The export generation process:
+
+1. **Fetches Mod List**: Retrieves all mods in your modpack
+2. **Applies Configuration**: Uses your saved export configuration (or defaults)
+3. **Sorts Mods**: Orders mods according to your specified sequence
+4. **Filters Components**: Includes only selected Steam Mod IDs
+5. **Formats Output**: Generates the server configuration in the correct format
+6. **Saves Export**: Stores the file content for download
+
+<Info>
+  Export jobs are processed in the background. For large modpacks (50+ mods), this may take 10-30 seconds.
+</Info>
+
+## Downloading the Server File
+
+Once the export is complete, download the configuration file.
+
+### Download Process
+
+1. After the export completes, a download button or link appears
+2. Click "Download" to get the server configuration file
+3. The file is downloaded with a descriptive name (e.g., `modpack-name-42x.ini`)
+
+### File Format
+
+The downloaded file is a plain text file containing three main lines:
+
+```ini
+Mods=\ModID1;\ModID2;\ModID3;\ModID4
+Map=Muldraugh, KY;CustomMap1;CustomMap2
+WorkshopItems=2876012699;2876012700;2876012701
+```
+
+<AccordionGroup>
+  <Accordion title="Mods Line">
+    **Format**: `Mods=<semicolon-separated list>`
+    
+    Contains Steam Mod IDs for all selected mod components:
+    - Build 42.x: IDs prefixed with `\` (e.g., `\ModID`)
+    - Build 41.x: IDs without prefix (e.g., `ModID`)
+    
+    Example:
+    ```
+    Mods=\ModID1;\ModID2;\ModID3
+    ```
+  </Accordion>
+  
+  <Accordion title="Map Line">
+    **Format**: `Map=<semicolon-separated list>`
+    
+    Contains map folders from mods plus the default map:
+    - Always includes `Muldraugh, KY` as the default
+    - Appends custom map folders from mods
+    
+    Example:
+    ```
+    Map=Muldraugh, KY;CustomMapName;AnotherMap
+    ```
+  </Accordion>
+  
+  <Accordion title="WorkshopItems Line">
+    **Format**: `WorkshopItems=<semicolon-separated list>`
+    
+    Contains Steam Workshop IDs for all mods:
+    - One Workshop ID per mod
+    - Used by Steam to download mods to the server
+    
+    Example:
+    ```
+    WorkshopItems=2876012699;2876012700;2876012701
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Using the Server File
+
+Integrate the exported configuration into your Project Zomboid server.
+
+### Server Configuration Steps
+
+<Steps>
+  <Step title="Locate Server INI File">
+    Find your server's configuration file:
+    - Windows: `Zomboid/Server/<servername>.ini`
+    - Linux: `~/.steam/steam/steamapps/common/Project Zomboid Dedicated Server/Zomboid/Server/<servername>.ini`
+  </Step>
+  
+  <Step title="Open Configuration File">
+    Open the `.ini` file in a text editor.
+  </Step>
+  
+  <Step title="Find Mod Configuration Section">
+    Locate the existing `Mods=`, `Map=`, and `WorkshopItems=` lines in the file.
+  </Step>
+  
+  <Step title="Replace with Exported Content">
+    Copy the three lines from your downloaded file and replace the corresponding lines in the server INI.
+  </Step>
+  
+  <Step title="Save and Restart">
+    - Save the INI file
+    - Restart your Project Zomboid server
+    - Steam will download any missing mods
+    - Server will load with your modpack configuration
+  </Step>
+</Steps>
+
+<Warning>
+  **Backup your server configuration** before making changes. Keep a copy of your original `Mods=`, `Map=`, and `WorkshopItems=` lines in case you need to rollback.
+</Warning>
+
+### Troubleshooting Server Configuration
+
+<AccordionGroup>
+  <Accordion title="Mods Not Loading">
+    **Possible causes:**
+    - Wrong build version selected (41.x vs 42.x format mismatch)
+    - Invalid Steam Workshop IDs
+    - Mods not downloaded by Steam yet
+    
+    **Solutions:**
+    - Verify build version matches your server
+    - Check server console for mod loading errors
+    - Wait for Steam to download all Workshop items
+    - Ensure Workshop IDs are correct in PZ Packs database
+  </Accordion>
+  
+  <Accordion title="Custom Maps Not Appearing">
+    **Possible causes:**
+    - Map folder names incorrect
+    - Mods with maps not properly configured
+    
+    **Solutions:**
+    - Verify map folder names in mod details
+    - Check that map mods are included in the Workshop items list
+    - Review mod descriptions for special map configuration requirements
+  </Accordion>
+  
+  <Accordion title="Server Crashes on Startup">
+    **Possible causes:**
+    - Mod conflicts
+    - Incompatible mod versions
+    - Missing mod dependencies
+    
+    **Solutions:**
+    - Check server console logs for error messages
+    - Test mods in small groups to isolate conflicts
+    - Verify all required dependencies are in the modpack
+    - Try a different mod load order
+  </Accordion>
+</AccordionGroup>
+
+## Export Configuration Storage
+
+PZ Packs stores export configurations separately from modpack metadata.
+
+### Per-User Configurations
+
+Each user can save their own export configuration:
+
+```json
+{
+  "modpackId": "uuid-of-modpack",
+  "userId": "uuid-of-user",
+  "modsOrder": ["mod1-uuid", "mod2-uuid"],
+  "modConfig": {
+    "mod1-uuid": {
+      "selectedSteamModIds": ["ModID1", "ModID2"]
+    }
+  }
+}
+```
+
+### Fallback to Modpack Defaults
+
+If a user hasn't saved a custom export configuration:
+- The system uses the modpack's default metadata
+- Modpack owner's configuration is stored in the modpack metadata
+- All Steam Mod IDs are selected by default
+
+<Info>
+  This allows team members to work on the same modpack while maintaining different export preferences (e.g., different mod orders for testing purposes).
+</Info>
+
+## Export History
+
+PZ Packs tracks all export requests for audit and debugging purposes.
+
+### Stored Information
+
+Each export record includes:
+- **Export ID**: Unique identifier
+- **Modpack ID**: Which modpack was exported
+- **User ID**: Who requested the export
+- **Version**: Build version (41.x or 42.x)
+- **Status**: Pending, completed, or failed
+- **File Content**: The generated configuration text
+- **Timestamps**: Created and updated times
+
+<Note>
+  Export history is not currently displayed in the UI but is stored in the database for administrative purposes.
+</Note>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Before Exporting">
+    - Review and test your mod load order
+    - Verify all mods are compatible with your target build version
+    - Check that required dependencies are included
+    - Save your export configuration before requesting a file
+  </Accordion>
+  
+  <Accordion title="Server Deployment">
+    - Always backup your existing server configuration
+    - Test the modpack in single-player before deploying to a live server
+    - Deploy during low-traffic periods
+    - Have a rollback plan ready
+    - Monitor server logs during the first startup
+  </Accordion>
+  
+  <Accordion title="Maintenance">
+    - Re-export after adding or removing mods
+    - Update exports when mod versions change significantly
+    - Keep a copy of working configurations
+    - Document any custom tweaks made outside of PZ Packs
+  </Accordion>
+  
+  <Accordion title="Build Version Management">
+    - Use separate modpacks for Build 41 and Build 42
+    - Clearly label modpacks with the target build
+    - Test after Project Zomboid updates
+    - Verify mod compatibility when switching builds
+  </Accordion>
+</AccordionGroup>
+
+## Permissions
+
+To export server files, you need the **export** permission on the modpack.
+
+- **Owners**: Have export permission by default
+- **Members**: Require the `export` permission to be granted
+
+See [Team Collaboration](/features/team-collaboration) for details on permissions.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Modpack Management" icon="box" href="/features/modpacks">
+    Learn how to organize and configure your modpacks
+  </Card>
+  
+  <Card title="Mod Browsing" icon="puzzle-piece" href="/features/mods">
+    Add and configure mods for your modpack
+  </Card>
+  
+  <Card title="Team Collaboration" icon="users" href="/features/team-collaboration">
+    Share export configurations with team members
+  </Card>
+  
+  <Card title="API Reference" icon="code" href="/api/modpacks">
+    Automate exports using the API
+  </Card>
+</CardGroup>

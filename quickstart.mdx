@@ -1,80 +1,222 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quickstart
+description: Get up and running with PZ Packs in minutes
 ---
 
-## Get started in three steps
+This guide will walk you through creating your first modpack and exporting a server configuration file for Project Zomboid.
 
-Get your documentation site running locally and make your first customization.
+## Prerequisites
 
-### Step 1: Set up your local environment
+Before you begin, make sure you have:
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+- A Discord account (for authentication)
+- A Project Zomboid dedicated server (or planning to set one up)
+- Access to Steam Workshop for Project Zomboid mods
 
-### Step 2: Deploy your changes
+## Getting started
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+<Steps>
+  <Step title="Create your account">
+    Navigate to PZ Packs and sign in with Discord.
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+    1. Click **Sign in with Discord** on the homepage
+    2. Authorize PZ Packs to access your Discord profile
+    3. You'll be redirected back to PZ Packs, now authenticated
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+    <Note>
+      PZ Packs uses Discord OAuth for authentication. Your Discord email and profile information are used to create your account.
+    </Note>
+  </Step>
 
-### Step 3: Go live
+  <Step title="Create your first modpack">
+    Once authenticated, create a modpack to organize your server mods.
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+    1. Click **Create Modpack** from your dashboard
+    2. Fill in the modpack details:
+       - **Name**: Give your modpack a descriptive name
+       - **Description**: Explain what your modpack is for
+       - **Avatar URL** (optional): Add an image for your modpack
+       - **Steam URL** (optional): Link to a related Steam collection
+    3. Set visibility:
+       - **Public**: Anyone can view and use your modpack
+       - **Private**: Only you and invited members can access it
+    4. Click **Create**
 
-## Next steps
+    Your modpack is now created and you'll be taken to its detail page.
+  </Step>
 
-Now that you have your docs running, explore these key features:
+  <Step title="Add mods to your modpack">
+    Add Project Zomboid mods to your modpack. You have three options:
+
+    <Tabs>
+      <Tab title="Import from Steam">
+        The fastest way to add multiple mods at once.
+
+        1. Find or create a Steam Workshop Collection with your desired mods
+        2. Copy the collection URL (e.g., `https://steamcommunity.com/sharedfiles/filedetails/?id=123456789`)
+        3. In your modpack, click **Import from Steam**
+        4. Paste the collection URL
+        5. Click **Import**
+
+        The import runs in the background. You can check the status on your modpack page.
+
+        <Tip>
+          Steam collections are a great way to organize and share mod lists. Create one on Steam Workshop first, then import it into PZ Packs.
+        </Tip>
+      </Tab>
+
+      <Tab title="Search and add">
+        Browse the PZ Packs mod catalog to find specific mods.
+
+        1. Go to the **Mods** tab
+        2. Search by name, tag, or Workshop ID
+        3. Click on a mod to view details
+        4. Click **Add to Modpack** and select your modpack
+
+        The mod will be added to your modpack immediately.
+      </Tab>
+
+      <Tab title="Add by Workshop ID">
+        If you know the Steam Workshop ID of a mod:
+
+        1. In your modpack, click **Add Mod**
+        2. Enter the Workshop ID (e.g., `2169435993`)
+        3. Click **Add**
+
+        The mod details will be fetched from Steam Workshop and added to your modpack.
+      </Tab>
+    </Tabs>
+
+    <Warning>
+      Some mods have dependencies (required mods). PZ Packs will show these in the mod details, but you need to manually add them to your modpack.
+    </Warning>
+  </Step>
+
+  <Step title="Configure mod order">
+    Mod load order can be important for compatibility.
+
+    1. On your modpack page, view the list of mods
+    2. Drag and drop mods to reorder them
+    3. Place core/framework mods first, content mods later
+    4. Save the order
+
+    <Info>
+      The mod order determines the load order in Project Zomboid. Some mods require specific ordering to work correctly.
+    </Info>
+  </Step>
+
+  <Step title="Configure export settings">
+    Before exporting, configure your server version and mod settings.
+
+    1. Click **Export Configuration** on your modpack page
+    2. Select your Project Zomboid version:
+       - **Build 41.x**: Uses `ModID=Workshop_ID` format
+       - **Build 42.x**: Uses `WorkshopID` format
+    3. For mods with multiple Steam Mod IDs, select which ones to include
+    4. Click **Save Configuration**
+
+    <Note>
+      Some mods have multiple Steam Mod IDs for different components (e.g., separate map and mod IDs). You can choose which ones to include in your export.
+    </Note>
+  </Step>
+
+  <Step title="Export server configuration">
+    Generate your server configuration file.
+
+    1. Click **Request Server File**
+    2. Choose your version (41.x or 42.x)
+    3. Click **Generate**
+
+    The file generation runs in the background (usually takes 5-10 seconds).
+
+    4. Once complete, click **Download** to get your configuration file
+
+    The downloaded file will be named something like `modpack_name_41x.txt` or `modpack_name_42x.txt`.
+  </Step>
+
+  <Step title="Install on your server">
+    Use the exported configuration file on your Project Zomboid dedicated server.
+
+    <Tabs>
+      <Tab title="Windows Server">
+        1. Navigate to your server directory (e.g., `C:\Users\YourUser\Zomboid\Server\`)
+        2. Open the server config file (e.g., `servertest.ini`)
+        3. Find the `Mods=` and `WorkshopItems=` lines
+        4. Replace them with the content from your downloaded file
+        5. If there's a `Map=` line in the export, update that too
+        6. Save the file
+        7. Restart your server
+      </Tab>
+
+      <Tab title="Linux Server">
+        1. Navigate to your server directory (e.g., `/home/user/Zomboid/Server/`)
+        2. Open the server config file (e.g., `servertest.ini`)
+        3. Find the `Mods=` and `WorkshopItems=` lines
+        4. Replace them with the content from your downloaded file
+        5. If there's a `Map=` line in the export, update that too
+        6. Save the file
+        7. Restart your server
+      </Tab>
+    </Tabs>
+
+    <Warning>
+      Always backup your server configuration before making changes. If something goes wrong, you can restore the backup.
+    </Warning>
+  </Step>
+</Steps>
+
+## What's next?
+
+Now that you have your first modpack set up, explore these features:
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Team Collaboration" icon="users" href="/features/team-collaboration">
+    Invite team members to help manage your modpack
+  </Card>
+  <Card title="Server Configuration" icon="server" href="/features/server-configuration">
+    Learn more about export options and configurations
+  </Card>
+  <Card title="Importing from Steam" icon="download" href="/guides/importing-from-steam">
+    Deep dive into Steam Workshop import features
+  </Card>
+  <Card title="API Reference" icon="code" href="/api/overview">
+    Automate modpack management with the API
+  </Card>
 </CardGroup>
 
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Mods not loading on server">
+    If your mods aren't loading after updating the server config:
+
+    - Verify the server has internet access to download from Steam Workshop
+    - Check the server logs for mod loading errors
+    - Ensure the Workshop IDs are correct in your config
+    - Make sure you restarted the server after updating the config
+    - For Build 42.x servers, use the 42.x export format (not 41.x)
+  </Accordion>
+
+  <Accordion title="Import from Steam failing">
+    If Steam Collection import fails:
+
+    - Verify the collection URL is correct and public
+    - Check if the collection contains Project Zomboid mods (not other games)
+    - Wait a few moments and check the import status again
+    - Some collections with many mods (50+) may take longer to import
+  </Accordion>
+
+  <Accordion title="Can't find a specific mod">
+    If you can't find a mod in the PZ Packs catalog:
+
+    - Try adding it by Workshop ID directly
+    - The mod may be too new - PZ Packs updates its catalog regularly
+    - Verify the mod exists on Steam Workshop and is for Project Zomboid
+  </Accordion>
+</AccordionGroup>
+
+## Need help?
+
+- Join our Discord community for support
+- Check the [detailed guides](/guides/importing-from-steam) for more information
+- Report issues on [GitHub](https://github.com/Greens-Organization/pz-packs)

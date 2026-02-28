@@ -1,0 +1,236 @@
+---
+title: API Overview
+description: Introduction to the PZ Packs API for managing Project Zomboid mod collections
+---
+
+## Introduction
+
+The PZ Packs API is a RESTful API built with [Elysia](https://elysiajs.com) that enables programmatic access to manage Project Zomboid mod collections (modpacks), mods, members, and notifications.
+
+## Base URL
+
+The API is available at:
+
+```
+http://localhost:3001
+```
+
+<Note>
+In production, the base URL will be your deployed API endpoint. Replace `localhost:3001` with your production domain.
+</Note>
+
+## API Structure
+
+The API is organized into the following resource groups:
+
+- **Modpacks** (`/modpacks`) - Create and manage mod collections
+- **Mods** (`/mods`) - Browse and manage individual mods
+- **Members** (`/modpacks/:id/members`) - Manage modpack collaborators
+- **Notifications** (`/notifications`) - User notification management
+- **Admin** (`/admin`) - Administrative endpoints
+- **Auth** (`/auth`) - Authentication endpoints (Better Auth)
+
+## Request Format
+
+All API requests use JSON format. Include the appropriate `Content-Type` header:
+
+```bash
+Content-Type: application/json
+```
+
+### Example Request
+
+```bash
+curl -X POST http://localhost:3001/modpacks \
+  -H "Content-Type: application/json" \
+  -H "Cookie: better-auth.session_token=YOUR_SESSION_TOKEN" \
+  -d '{
+    "name": "My Survival Pack",
+    "description": "Essential mods for hardcore survival",
+    "isPublic": true
+  }'
+```
+
+## Response Format
+
+All API responses return JSON with appropriate HTTP status codes.
+
+### Success Response
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "name": "My Survival Pack",
+  "description": "Essential mods for hardcore survival",
+  "isPublic": true,
+  "owner": "user-id-here",
+  "createdAt": "2026-02-28T12:00:00Z",
+  "updatedAt": "2026-02-28T12:00:00Z"
+}
+```
+
+### Error Response
+
+Error responses include an `error` object with a descriptive message:
+
+```json
+{
+  "error": {
+    "message": "Modpack not found"
+  }
+}
+```
+
+## HTTP Status Codes
+
+The API uses standard HTTP status codes:
+
+| Status Code | Description |
+|-------------|-------------|
+| `200` | Success |
+| `201` | Resource created successfully |
+| `204` | Success with no content |
+| `400` | Bad request (validation error) |
+| `401` | Unauthorized (not authenticated) |
+| `403` | Forbidden (authenticated but not authorized) |
+| `404` | Resource not found |
+| `422` | Unprocessable entity (validation failed) |
+| `500` | Internal server error |
+
+## Pagination
+
+List endpoints support pagination through query parameters:
+
+```bash
+GET /modpacks/public?page=1&limit=20
+```
+
+**Parameters:**
+- `page` - Page number (default: 1)
+- `limit` - Items per page (default: 20)
+
+**Response includes pagination metadata:**
+
+```json
+{
+  "data": [...],
+  "meta": {
+    "page": 1,
+    "limit": 20,
+    "total": 100,
+    "totalPages": 5
+  }
+}
+```
+
+## Filtering and Searching
+
+Many list endpoints support filtering:
+
+```bash
+GET /mods?search=vehicles&tags=vehicles,multiplayer
+```
+
+**Common filter parameters:**
+- `search` - Text search across relevant fields
+- `tags` - Filter by tags (comma-separated)
+- `modpackId` - Filter by modpack ID
+
+## Public vs Authenticated Endpoints
+
+Some endpoints are publicly accessible without authentication:
+
+- `GET /modpacks/public` - List public modpacks
+- `GET /modpacks/public/:id` - Get public modpack details
+- `GET /mods` - List all mods
+- `GET /mods/:id` - Get mod details
+- `GET /mods/tags` - List all tags
+
+All other endpoints require authentication. See the [Authentication](/api/authentication) guide for details.
+
+## Permissions and Authorization
+
+Authenticated endpoints use role-based access control (RBAC) with two roles:
+
+### User Role
+
+**Modpack permissions:**
+- `create` - Create new modpacks
+- `read` - View own/shared modpacks
+- `update` - Update own modpacks
+- `archive` - Archive own modpacks
+- `export` - Export server files
+- `add-mod` - Add mods to modpacks
+- `remove-mod` - Remove mods from modpacks
+- `import` - Import from Steam collections
+- `manager-members` - Manage modpack members
+
+**Mod permissions:**
+- `create`, `read`, `update`, `remove` - Standard CRUD operations
+
+**Notification permissions:**
+- `read`, `update` - View and update notifications
+
+### Admin Role
+
+Admins have all user permissions plus:
+- `mod.update-all` - Trigger global mod updates
+- `admin.access` - Access admin endpoints
+
+<Warning>
+Ownership and membership are checked at the controller level. For example, only modpack owners can update or archive modpacks, while both owners and members can add/remove mods.
+</Warning>
+
+## Rate Limiting
+
+<Info>
+Rate limiting is currently not implemented. In production deployments, consider implementing rate limiting at the infrastructure level (e.g., using a reverse proxy or API gateway).
+</Info>
+
+## CORS Configuration
+
+The API is configured with CORS support:
+
+- **Allowed Origins:** Configured via `ORIGIN_ALLOWED` environment variable (comma-separated list)
+- **Allowed Methods:** `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `OPTIONS`
+- **Credentials:** Enabled (cookies are supported)
+- **Allowed Headers:** `Content-Type`, `Authorization`
+
+## OpenAPI Documentation
+
+In development mode, interactive API documentation is available via Elysia's OpenAPI plugin:
+
+```
+http://localhost:3001/docs
+```
+
+<Note>
+OpenAPI documentation is automatically disabled in production (`NODE_ENV=production`).
+</Note>
+
+## Health Check
+
+Monitor API availability using the health check endpoint:
+
+```bash
+curl http://localhost:3001/health
+```
+
+**Response:**
+
+```json
+{
+  "message": "OK"
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="lock" href="/api/authentication">
+    Learn how to authenticate API requests
+  </Card>
+  <Card title="Modpack Endpoints" icon="code" href="/api/modpacks">
+    Explore modpack API endpoints
+  </Card>
+</CardGroup>

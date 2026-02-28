@@ -1,0 +1,178 @@
+---
+title: Importing from Steam Workshop
+description: Step-by-step guide to import mods from Steam Workshop collections into your modpack
+---
+
+Import your entire Steam Workshop collection into PZ Packs with just a URL. This guide walks you through finding your collection URL, starting the import process, and monitoring the import status.
+
+## Overview
+
+The Steam import feature automatically scrapes all mods from a Steam Workshop collection and adds them to your modpack. The process runs in the background and can take several minutes depending on the collection size.
+
+<Note>
+You must be the owner or a member of the modpack to import mods. Public modpacks cannot be modified by non-members.
+</Note>
+
+## Finding Your Steam Collection URL
+
+<Steps>
+  <Step title="Navigate to your Steam Workshop collection">
+    Open Steam and go to the Project Zomboid Workshop, then navigate to your collection or find the collection you want to import.
+  </Step>
+
+  <Step title="Copy the collection URL">
+    Copy the full URL from your browser's address bar. It should look like:
+    
+    ```
+    https://steamcommunity.com/sharedfiles/filedetails/?id=123456789
+    ```
+    
+    The URL must:
+    - Be from `steamcommunity.com` domain
+    - Contain the `?id=` parameter with your collection ID
+    - Point to a collection (not an individual mod)
+  </Step>
+
+  <Step title="Verify it's a collection">
+    Make sure the page shows "Collection" at the top, not "Mod". Individual mod pages cannot be imported - only collections.
+  </Step>
+</Steps>
+
+## Starting the Import Process
+
+<Steps>
+  <Step title="Open your modpack">
+    Navigate to your modpack page in PZ Packs. You'll see an "Import from Steam" button or option in the modpack controls.
+  </Step>
+
+  <Step title="Enter the Steam Collection URL">
+    Click the import button and paste your Steam Workshop collection URL into the text field.
+    
+    The form validates that:
+    - The URL is properly formatted
+    - The domain is `steamcommunity.com`
+    - The URL contains a valid collection ID
+  </Step>
+
+  <Step title="Submit the import request">
+    Click "Import Modpack" to start the background import process.
+    
+    You'll receive a confirmation message:
+    
+    <Note>
+    "The modpack is being imported in the background; this may take a few minutes. You will be notified when it is finished."
+    </Note>
+  </Step>
+</Steps>
+
+## What Happens During Import
+
+When you submit an import request, PZ Packs:
+
+1. **Validates the URL** - Checks that the URL points to a valid Steam Workshop collection
+2. **Scrapes collection data** - Retrieves all mod Workshop IDs from the collection page
+3. **Processes each mod** - For every mod in the collection:
+   - Fetches mod metadata from Steam
+   - Extracts mod information (name, description, Workshop ID, etc.)
+   - Checks for map folders and dependencies
+   - Adds the mod to your modpack
+4. **Handles dependencies** - Automatically includes required dependencies for multi-part mods
+5. **Tracks progress** - Updates the import status as mods are processed
+
+<Tip>
+The import process uses a background job queue, so you can close the page and come back later. Your import will continue running.
+</Tip>
+
+## Monitoring Import Status
+
+The import status is displayed in real-time on your modpack page:
+
+### Status Types
+
+- **Idle** - No import is currently running
+- **Waiting** - Import job is queued and waiting to start
+- **Active** - Import is currently processing mods
+- **Completed** - All mods have been successfully imported
+- **Failed** - The import encountered an error and stopped
+
+### Tracking Progress
+
+While the import is running:
+
+- The status polls automatically every 2 seconds
+- Your modpack's mod list refreshes when import completes
+- A notification appears when the process finishes
+
+<Warning>
+Only one import can run per modpack at a time. If you start a new import, it will replace any existing import job for that modpack.
+</Warning>
+
+## Handling Import Errors
+
+### Common Issues
+
+**"Invalid Steam URL"**
+- Verify the URL is from `steamcommunity.com`
+- Ensure the URL contains the `?id=` parameter
+- Check that you copied the complete URL
+
+**"The provided URL is not a Steam Collection"**
+- You may have provided a link to an individual mod instead of a collection
+- Collections show "Collection" at the top of the Steam Workshop page
+- Individual mods must be added manually or as part of a collection
+
+**"You do not have permission to edit this modpack"**
+- Only the modpack owner and active members can import mods
+- Request the owner to add you as a member first
+- Check that the modpack is not archived (inactive)
+
+**"Modpack is not active"**
+- The modpack has been archived
+- Contact the owner to reactivate it before importing
+
+### Partial Import Failures
+
+If some mods fail to import but others succeed:
+
+- The import will continue processing remaining mods
+- Successfully imported mods are added to your modpack
+- Error details are logged for failed mods
+- You can manually add any failed mods later
+
+<Tip>
+After a successful import, review your modpack to ensure all expected mods were added. Some mods may fail to import if they've been removed from Steam Workshop.
+</Tip>
+
+## Import Results
+
+When the import completes successfully, you'll see:
+
+- **Added mods count** - Number of mods successfully imported
+- **Errors list** - Any mods that failed to import with error messages
+- **Updated mod list** - Your modpack automatically refreshes to show new mods
+
+## Best Practices
+
+<Steps>
+  <Step title="Review before importing">
+    Check the Steam collection page to verify it contains the mods you want. Large collections may take several minutes to import.
+  </Step>
+
+  <Step title="Monitor the import">
+    Stay on the page for the first minute to ensure the import starts successfully and doesn't immediately fail.
+  </Step>
+
+  <Step title="Verify mod count">
+    After import completes, compare the number of added mods to the collection size to ensure all mods were imported.
+  </Step>
+
+  <Step title="Configure export settings">
+    After importing, review your [export configuration](/guides/exporting-server-files) to set mod load order and select specific mod variants.
+  </Step>
+</Steps>
+
+## Related Resources
+
+- [Managing Modpack Permissions](/guides/managing-permissions) - Control who can import mods to your modpack
+- [Exporting Server Files](/guides/exporting-server-files) - Generate server configuration files from your imported mods
+- [API Reference: Import Modpack](/api-reference/modpacks/import) - API documentation for the import endpoint

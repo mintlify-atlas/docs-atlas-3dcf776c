@@ -1,0 +1,464 @@
+---
+title: 'Mods'
+description: 'Browse and manage Project Zomboid mods'
+---
+
+## List Mods
+
+<Api method="GET" url="/mods" />
+
+List all mods with pagination, search, and filtering capabilities. No authentication required.
+
+### Query Parameters
+
+<ParamField query="page" type="string" default="1">
+  Page number for pagination
+</ParamField>
+
+<ParamField query="limit" type="string" default="10">
+  Number of items per page
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search term to filter mods by name or description
+</ParamField>
+
+<ParamField query="sortBy" type="string" default="createdAt">
+  Field to sort by: `createdAt`, `updatedAt`, or `name`
+</ParamField>
+
+<ParamField query="sortOrder" type="string" default="asc">
+  Sort order: `asc` or `desc`
+</ParamField>
+
+<ParamField query="tags" type="string | array">
+  Filter by tags (comma-separated string or array of tag IDs)
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="array">
+  <Expandable title="Mod Object">
+    <ResponseField name="id" type="string">
+      Unique identifier (UUID)
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Mod name
+    </ResponseField>
+    <ResponseField name="workshopId" type="string">
+      Steam Workshop ID
+    </ResponseField>
+    <ResponseField name="steamModId" type="array">
+      Array of Steam mod IDs
+    </ResponseField>
+    <ResponseField name="description" type="string">
+      Mod description
+    </ResponseField>
+    <ResponseField name="steamUrl" type="string">
+      Steam Workshop page URL
+    </ResponseField>
+    <ResponseField name="avatarUrl" type="string">
+      Mod avatar/thumbnail URL
+    </ResponseField>
+    <ResponseField name="mapFolders" type="array">
+      Array of map folder names
+    </ResponseField>
+    <ResponseField name="requiredMods" type="array">
+      Array of required mod IDs
+    </ResponseField>
+    <ResponseField name="tags" type="array">
+      Array of tag UUIDs
+    </ResponseField>
+    <ResponseField name="isActive" type="boolean">
+      Whether the mod is active
+    </ResponseField>
+    <ResponseField name="createdAt" type="string">
+      ISO 8601 timestamp
+    </ResponseField>
+    <ResponseField name="updatedAt" type="string">
+      ISO 8601 timestamp
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  <ResponseField name="page" type="number">
+    Current page number
+  </ResponseField>
+  <ResponseField name="limit" type="number">
+    Items per page
+  </ResponseField>
+  <ResponseField name="total" type="number">
+    Total number of items
+  </ResponseField>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.pzpacks.com/mods?page=1&limit=20&search=hydrocraft&tags=crafting,survival"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "data": [
+    {
+      "id": "mod-uuid-1",
+      "name": "Hydrocraft",
+      "workshopId": "2898758886",
+      "steamModId": ["Hydrocraft"],
+      "description": "Massive crafting expansion for Project Zomboid",
+      "steamUrl": "https://steamcommunity.com/sharedfiles/filedetails/?id=2898758886",
+      "avatarUrl": "https://example.com/hydrocraft.jpg",
+      "mapFolders": [],
+      "requiredMods": [],
+      "tags": ["tag-uuid-1", "tag-uuid-2"],
+      "isActive": true,
+      "createdAt": "2024-01-10T08:00:00Z",
+      "updatedAt": "2024-01-15T10:30:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 150
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Get Mod by ID
+
+<Api method="GET" url="/mods/:id" />
+
+Get detailed information about a specific mod by its UUID. No authentication required.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  Mod UUID
+</ParamField>
+
+### Response
+
+<ResponseField name="id" type="string">
+  Mod UUID
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Mod name
+</ResponseField>
+
+<ResponseField name="workshopId" type="string">
+  Steam Workshop ID
+</ResponseField>
+
+<ResponseField name="steamModId" type="array">
+  Array of Steam mod IDs
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  Full mod description
+</ResponseField>
+
+<ResponseField name="steamUrl" type="string">
+  Steam Workshop page URL
+</ResponseField>
+
+<ResponseField name="avatarUrl" type="string">
+  Mod avatar/thumbnail URL
+</ResponseField>
+
+<ResponseField name="mapFolders" type="array">
+  Array of map folder names (for map mods)
+</ResponseField>
+
+<ResponseField name="requiredMods" type="array">
+  Array of required mod IDs (dependencies)
+</ResponseField>
+
+<ResponseField name="tags" type="array">
+  Array of tag UUIDs
+</ResponseField>
+
+<ResponseField name="highlights" type="array">
+  Array of highlight strings
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.pzpacks.com/mods/mod-uuid-1"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "id": "mod-uuid-1",
+  "name": "Hydrocraft",
+  "workshopId": "2898758886",
+  "steamModId": ["Hydrocraft"],
+  "description": "Massive crafting expansion for Project Zomboid",
+  "steamUrl": "https://steamcommunity.com/sharedfiles/filedetails/?id=2898758886",
+  "avatarUrl": "https://example.com/hydrocraft.jpg",
+  "mapFolders": [],
+  "requiredMods": [],
+  "tags": ["tag-uuid-1", "tag-uuid-2"],
+  "highlights": ["1000+ new items", "Advanced crafting"],
+  "isActive": true,
+  "createdAt": "2024-01-10T08:00:00Z",
+  "updatedAt": "2024-01-15T10:30:00Z"
+}
+```
+
+```json Error Response
+{
+  "error": {
+    "message": "Mod not found"
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Get Mod by Workshop ID
+
+<Api method="GET" url="/mods/workshop/:workshopId" />
+
+Get mod information by Steam Workshop ID. No authentication required.
+
+### Path Parameters
+
+<ParamField path="workshopId" type="string" required>
+  Steam Workshop ID (e.g., "2898758886")
+</ParamField>
+
+### Response
+
+Returns the same mod object structure as "Get Mod by ID".
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.pzpacks.com/mods/workshop/2898758886"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "id": "mod-uuid-1",
+  "name": "Hydrocraft",
+  "workshopId": "2898758886",
+  "steamModId": ["Hydrocraft"],
+  "description": "Massive crafting expansion for Project Zomboid",
+  "steamUrl": "https://steamcommunity.com/sharedfiles/filedetails/?id=2898758886",
+  "avatarUrl": "https://example.com/hydrocraft.jpg",
+  "isActive": true,
+  "createdAt": "2024-01-10T08:00:00Z",
+  "updatedAt": "2024-01-15T10:30:00Z"
+}
+```
+
+```json Error Response
+{
+  "error": {
+    "message": "Mod not found"
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Update Mod
+
+<Api method="PATCH" url="/mods/:id" auth="bearer" />
+
+Update mod information. Requires admin permissions.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  Mod UUID
+</ParamField>
+
+### Body Parameters
+
+All fields are optional. Only include fields you want to update.
+
+<ParamField body="name" type="string">
+  Mod name
+</ParamField>
+
+<ParamField body="description" type="string">
+  Mod description
+</ParamField>
+
+<ParamField body="steamUrl" type="string">
+  Steam Workshop page URL
+</ParamField>
+
+<ParamField body="avatarUrl" type="string">
+  Mod avatar/thumbnail URL
+</ParamField>
+
+<ParamField body="mapFolders" type="array">
+  Array of map folder names (strings)
+</ParamField>
+
+<ParamField body="requiredMods" type="array">
+  Array of required mod IDs (strings)
+</ParamField>
+
+<ParamField body="tags" type="array">
+  Array of tag IDs (strings)
+</ParamField>
+
+<ParamField body="steamModId" type="array">
+  Array of Steam mod IDs (strings)
+</ParamField>
+
+<ParamField body="workshopId" type="string">
+  Steam Workshop ID
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X PATCH "https://api.pzpacks.com/mods/mod-uuid-1" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Hydrocraft - Updated",
+    "description": "Updated description for Hydrocraft mod",
+    "tags": ["tag-uuid-1", "tag-uuid-2"]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "id": "mod-uuid-1",
+  "name": "Hydrocraft - Updated",
+  "description": "Updated description for Hydrocraft mod",
+  "workshopId": "2898758886",
+  "steamModId": ["Hydrocraft"],
+  "tags": ["tag-uuid-1", "tag-uuid-2"],
+  "updatedAt": "2024-01-17T10:00:00Z"
+}
+```
+
+```json Error Response
+{
+  "error": {
+    "message": "You do not have permission to update mods"
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Update All Mods
+
+<Api method="POST" url="/mods/update-all" auth="bearer" />
+
+Trigger an update of all mods from Steam Workshop. This is an asynchronous operation that updates mod information from Steam. Requires admin permissions.
+
+### Response
+
+<ResponseField name="message" type="string">
+  Status message
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Job status (typically "started" or "pending")
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.pzpacks.com/mods/update-all" \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "message": "Mod update job started",
+  "status": "started"
+}
+```
+
+```json Error Response
+{
+  "error": {
+    "message": "You do not have permission to update all mods"
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## List Tags
+
+<Api method="GET" url="/mods/tags" />
+
+List all available mod tags. No authentication required.
+
+### Response
+
+<ResponseField name="tags" type="array">
+  <Expandable title="Tag Object">
+    <ResponseField name="id" type="string">
+      Tag UUID
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Tag name
+    </ResponseField>
+    <ResponseField name="slug" type="string">
+      URL-friendly slug
+    </ResponseField>
+    <ResponseField name="count" type="number">
+      Number of mods with this tag
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.pzpacks.com/mods/tags"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "tags": [
+    {
+      "id": "tag-uuid-1",
+      "name": "Crafting",
+      "slug": "crafting",
+      "count": 45
+    },
+    {
+      "id": "tag-uuid-2",
+      "name": "Survival",
+      "slug": "survival",
+      "count": 78
+    },
+    {
+      "id": "tag-uuid-3",
+      "name": "Weapons",
+      "slug": "weapons",
+      "count": 62
+    }
+  ]
+}
+```
+</ResponseExample>

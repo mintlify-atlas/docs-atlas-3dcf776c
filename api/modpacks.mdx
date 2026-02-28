@@ -1,0 +1,799 @@
+---
+title: 'Modpacks'
+description: 'Manage Project Zomboid mod collections'
+---
+
+## List Public Modpacks
+
+<Api method="GET" url="/modpacks/public" />
+
+List all public modpacks with pagination, search, and sorting capabilities. No authentication required.
+
+### Query Parameters
+
+<ParamField query="page" type="number" default="1">
+  Page number for pagination (must be positive integer)
+</ParamField>
+
+<ParamField query="limit" type="number" default="10">
+  Number of items per page (max 100)
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search term to filter modpacks by name or description
+</ParamField>
+
+<ParamField query="sortBy" type="string" default="createdAt">
+  Field to sort by: `createdAt`, `updatedAt`, or `name`
+</ParamField>
+
+<ParamField query="sortOrder" type="string" default="desc">
+  Sort order: `asc` or `desc`
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="array">
+  <Expandable title="Modpack Object">
+    <ResponseField name="id" type="string">
+      Unique identifier (UUID)
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Modpack name
+    </ResponseField>
+    <ResponseField name="description" type="string">
+      Optional description
+    </ResponseField>
+    <ResponseField name="avatarUrl" type="string">
+      Optional avatar image URL
+    </ResponseField>
+    <ResponseField name="steamUrl" type="string">
+      Optional Steam Workshop collection URL
+    </ResponseField>
+    <ResponseField name="owner" type="string">
+      Owner user ID (UUID)
+    </ResponseField>
+    <ResponseField name="isPublic" type="boolean">
+      Whether the modpack is publicly visible
+    </ResponseField>
+    <ResponseField name="isVerified" type="boolean">
+      Whether the modpack is verified
+    </ResponseField>
+    <ResponseField name="createdAt" type="string">
+      ISO 8601 timestamp
+    </ResponseField>
+    <ResponseField name="updatedAt" type="string">
+      ISO 8601 timestamp
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  <ResponseField name="page" type="number">
+    Current page number
+  </ResponseField>
+  <ResponseField name="limit" type="number">
+    Items per page
+  </ResponseField>
+  <ResponseField name="total" type="number">
+    Total number of items
+  </ResponseField>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.pzpacks.com/modpacks/public?page=1&limit=10&search=zombie&sortBy=name&sortOrder=asc"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "data": [
+    {
+      "id": "123e4567-e89b-12d3-a456-426614174000",
+      "name": "Zombie Survival Pack",
+      "description": "Essential mods for zombie survival",
+      "avatarUrl": "https://example.com/avatar.jpg",
+      "steamUrl": "https://steamcommunity.com/sharedfiles/filedetails/?id=123456",
+      "owner": "user-uuid-here",
+      "isPublic": true,
+      "isVerified": false,
+      "createdAt": "2024-01-15T10:30:00Z",
+      "updatedAt": "2024-01-16T14:20:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 45
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Get Public Modpack
+
+<Api method="GET" url="/modpacks/public/:id" />
+
+Get details of a public modpack by ID. No authentication required.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  Modpack UUID
+</ParamField>
+
+### Response
+
+<ResponseField name="id" type="string">
+  Modpack UUID
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Modpack name
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  Modpack description
+</ResponseField>
+
+<ResponseField name="avatarUrl" type="string">
+  Avatar image URL
+</ResponseField>
+
+<ResponseField name="owner" type="string">
+  Owner user ID
+</ResponseField>
+
+<ResponseField name="isPublic" type="boolean">
+  Public visibility status
+</ResponseField>
+
+<ResponseField name="members" type="array">
+  List of modpack members with permissions
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.pzpacks.com/modpacks/public/123e4567-e89b-12d3-a456-426614174000"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "name": "Zombie Survival Pack",
+  "description": "Essential mods for zombie survival",
+  "avatarUrl": "https://example.com/avatar.jpg",
+  "owner": "user-uuid-here",
+  "isPublic": true,
+  "isVerified": false,
+  "members": [],
+  "createdAt": "2024-01-15T10:30:00Z",
+  "updatedAt": "2024-01-16T14:20:00Z"
+}
+```
+
+```json Error Response
+{
+  "error": {
+    "message": "Modpack not found"
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## List My Modpacks
+
+<Api method="GET" url="/modpacks/my" auth="bearer" />
+
+List modpacks owned by or shared with the authenticated user.
+
+### Query Parameters
+
+<ParamField query="page" type="number" default="1">
+  Page number for pagination
+</ParamField>
+
+<ParamField query="limit" type="number" default="10">
+  Number of items per page (max 100)
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search term to filter modpacks
+</ParamField>
+
+<ParamField query="sortBy" type="string" default="createdAt">
+  Field to sort by: `createdAt`, `updatedAt`, or `name`
+</ParamField>
+
+<ParamField query="sortOrder" type="string" default="desc">
+  Sort order: `asc` or `desc`
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.pzpacks.com/modpacks/my" \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+</RequestExample>
+
+---
+
+## Create Modpack
+
+<Api method="POST" url="/modpacks" auth="bearer" />
+
+Create a new modpack. The authenticated user becomes the owner.
+
+### Body Parameters
+
+<ParamField body="name" type="string" required>
+  Modpack name (3-50 characters)
+</ParamField>
+
+<ParamField body="description" type="string">
+  Modpack description (max 1024 characters)
+</ParamField>
+
+<ParamField body="avatarUrl" type="string">
+  Avatar image URL (must be valid URL)
+</ParamField>
+
+<ParamField body="isPublic" type="boolean" default="false">
+  Whether the modpack is publicly visible
+</ParamField>
+
+<ParamField body="steamWorkshopUrl" type="string">
+  Steam Workshop collection URL (must be from steamcommunity.com)
+</ParamField>
+
+### Response
+
+<ResponseField name="id" type="string">
+  Created modpack UUID
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Modpack name
+</ResponseField>
+
+<ResponseField name="owner" type="string">
+  Owner user ID
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.pzpacks.com/modpacks" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "My Survival Pack",
+    "description": "Custom survival mods collection",
+    "isPublic": false
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "id": "987fcdeb-51a2-43c1-9876-543210fedcba",
+  "name": "My Survival Pack",
+  "description": "Custom survival mods collection",
+  "owner": "user-uuid-here",
+  "isPublic": false,
+  "isVerified": false,
+  "isActive": true,
+  "createdAt": "2024-01-17T09:15:00Z",
+  "updatedAt": "2024-01-17T09:15:00Z"
+}
+```
+
+```json Error Response
+{
+  "error": {
+    "message": "Name must be at least 3 characters long"
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Get Modpack
+
+<Api method="GET" url="/modpacks/:id" auth="bearer" />
+
+Get modpack details by ID. Access is granted to the owner, members, or if the modpack is public.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  Modpack UUID
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.pzpacks.com/modpacks/123e4567-e89b-12d3-a456-426614174000" \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "name": "Zombie Survival Pack",
+  "description": "Essential mods for zombie survival",
+  "avatarUrl": "https://example.com/avatar.jpg",
+  "owner": "user-uuid-here",
+  "isPublic": false,
+  "isVerified": false,
+  "members": [
+    {
+      "userId": "member-uuid",
+      "permission": ["read", "add-mod"],
+      "isActive": true
+    }
+  ],
+  "createdAt": "2024-01-15T10:30:00Z",
+  "updatedAt": "2024-01-16T14:20:00Z"
+}
+```
+
+```json Error Response
+{
+  "error": {
+    "message": "You do not have access to this modpack"
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Update Modpack
+
+<Api method="PATCH" url="/modpacks/:id" auth="bearer" />
+
+Update modpack details. Only the owner can update the modpack.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  Modpack UUID
+</ParamField>
+
+### Body Parameters
+
+<ParamField body="name" type="string">
+  Modpack name (3-50 characters)
+</ParamField>
+
+<ParamField body="description" type="string">
+  Modpack description (max 1024 characters)
+</ParamField>
+
+<ParamField body="avatarUrl" type="string">
+  Avatar image URL
+</ParamField>
+
+<ParamField body="isPublic" type="boolean">
+  Public visibility status
+</ParamField>
+
+<ParamField body="steamWorkshopUrl" type="string">
+  Steam Workshop URL (must be from steamcommunity.com)
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  <Expandable title="Metadata Object">
+    <ParamField body="modsOrder" type="array">
+      Array of mod IDs in desired order
+    </ParamField>
+    <ParamField body="modConfig" type="object">
+      Configuration per mod ID with selectedSteamModIds
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X PATCH "https://api.pzpacks.com/modpacks/123e4567-e89b-12d3-a456-426614174000" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Survival Pack",
+    "isPublic": true
+  }'
+```
+</RequestExample>
+
+---
+
+## Archive Modpack
+
+<Api method="DELETE" url="/modpacks/:id" auth="bearer" />
+
+Archive (soft delete) a modpack. Only the owner can archive the modpack.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  Modpack UUID
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X DELETE "https://api.pzpacks.com/modpacks/123e4567-e89b-12d3-a456-426614174000" \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "message": "Modpack archived successfully"
+}
+```
+</ResponseExample>
+
+---
+
+## Import from Steam
+
+<Api method="POST" url="/modpacks/:id/import" auth="bearer" />
+
+Import mods from a Steam Workshop collection to the modpack. This is an asynchronous operation.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  Modpack UUID
+</ParamField>
+
+### Body Parameters
+
+<ParamField body="steamUrl" type="string" required>
+  Steam Workshop collection URL (must be from steamcommunity.com)
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.pzpacks.com/modpacks/123e4567-e89b-12d3-a456-426614174000/import" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "steamUrl": "https://steamcommunity.com/sharedfiles/filedetails/?id=2898758886"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "message": "Import job started",
+  "status": "pending"
+}
+```
+</ResponseExample>
+
+---
+
+## Get Import Status
+
+<Api method="GET" url="/modpacks/:id/import/status" auth="bearer" />
+
+Get the status of a modpack import job.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  Modpack UUID
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.pzpacks.com/modpacks/123e4567-e89b-12d3-a456-426614174000/import/status" \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Response
+{
+  "status": "completed",
+  "modsImported": 25,
+  "modsFailed": 0
+}
+```
+</ResponseExample>
+
+---
+
+## Request Server File
+
+<Api method="POST" url="/modpacks/:id/server-file" auth="bearer" />
+
+Request generation of a server configuration file for the modpack.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  Modpack UUID
+</ParamField>
+
+### Body Parameters
+
+<ParamField body="version" type="string" required>
+  Game version: `41x` or `42x`
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.pzpacks.com/modpacks/123e4567-e89b-12d3-a456-426614174000/server-file" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "version": "42x"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "exportId": "export-uuid-here",
+  "status": "pending"
+}
+```
+</ResponseExample>
+
+---
+
+## Download Server File
+
+<Api method="GET" url="/modpacks/export/:exportId/download" auth="bearer" />
+
+Download a generated server configuration file.
+
+### Path Parameters
+
+<ParamField path="exportId" type="string" required>
+  Export UUID from server file request
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.pzpacks.com/modpacks/export/export-uuid-here/download" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -o servertest.ini
+```
+</RequestExample>
+
+---
+
+## Get Export Configuration
+
+<Api method="GET" url="/modpacks/:id/export-configuration" auth="bearer" />
+
+Get the export configuration for a modpack, including mod order and mod-specific settings.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  Modpack UUID
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.pzpacks.com/modpacks/123e4567-e89b-12d3-a456-426614174000/export-configuration" \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "modsOrder": ["mod-uuid-1", "mod-uuid-2", "mod-uuid-3"],
+  "modConfig": {
+    "mod-uuid-1": {
+      "selectedSteamModIds": ["2898758886"]
+    }
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Save Export Configuration
+
+<Api method="PUT" url="/modpacks/:id/export-configuration" auth="bearer" />
+
+Save export configuration for a modpack, including mod load order and per-mod settings.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  Modpack UUID
+</ParamField>
+
+### Body Parameters
+
+<ParamField body="modsOrder" type="array">
+  Array of mod IDs in desired load order
+</ParamField>
+
+<ParamField body="modConfig" type="object">
+  Configuration object with mod IDs as keys, each containing selectedSteamModIds array
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X PUT "https://api.pzpacks.com/modpacks/123e4567-e89b-12d3-a456-426614174000/export-configuration" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "modsOrder": ["mod-uuid-1", "mod-uuid-2"],
+    "modConfig": {
+      "mod-uuid-1": {
+        "selectedSteamModIds": ["2898758886"]
+      }
+    }
+  }'
+```
+</RequestExample>
+
+---
+
+## List Mods in Modpack
+
+<Api method="GET" url="/modpacks/:id/mods" />
+
+List all mods in a modpack with pagination and filtering.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  Modpack UUID
+</ParamField>
+
+### Query Parameters
+
+<ParamField query="page" type="string" default="1">
+  Page number
+</ParamField>
+
+<ParamField query="limit" type="string" default="10">
+  Items per page
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search term
+</ParamField>
+
+<ParamField query="sortBy" type="string" default="createdAt">
+  Sort field: `createdAt`, `updatedAt`, or `name`
+</ParamField>
+
+<ParamField query="sortOrder" type="string" default="asc">
+  Sort order: `asc` or `desc`
+</ParamField>
+
+<ParamField query="tags" type="string | array">
+  Filter by tags (comma-separated string or array)
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.pzpacks.com/modpacks/123e4567-e89b-12d3-a456-426614174000/mods?page=1&limit=20"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "data": [
+    {
+      "id": "mod-uuid-1",
+      "name": "Hydrocraft",
+      "workshopId": "2898758886",
+      "steamModId": ["Hydrocraft"],
+      "description": "Massive crafting expansion",
+      "avatarUrl": "https://example.com/mod-avatar.jpg",
+      "tags": ["crafting", "survival"],
+      "createdAt": "2024-01-15T10:30:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 45
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Add Mod to Modpack
+
+<Api method="POST" url="/modpacks/:id/mods" auth="bearer" />
+
+Add a mod to the modpack by Steam Workshop URL or mod ID. Owner and members can add mods.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  Modpack UUID
+</ParamField>
+
+### Body Parameters
+
+<ParamField body="modAtribute" type="string" required>
+  Steam Workshop URL or mod identifier (min 1 character, or valid URL)
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.pzpacks.com/modpacks/123e4567-e89b-12d3-a456-426614174000/mods" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "modAtribute": "https://steamcommunity.com/sharedfiles/filedetails/?id=2898758886"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "id": "modpack-mod-uuid",
+  "modpackId": "123e4567-e89b-12d3-a456-426614174000",
+  "modId": "mod-uuid-1",
+  "isActive": true,
+  "createdAt": "2024-01-17T09:30:00Z"
+}
+```
+</ResponseExample>
+
+---
+
+## Remove Mod from Modpack
+
+<Api method="DELETE" url="/modpacks/:id/mods/:modId" auth="bearer" />
+
+Remove a mod from the modpack. Owner and members can remove mods.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  Modpack UUID
+</ParamField>
+
+<ParamField path="modId" type="string" required>
+  Mod UUID
+</ParamField>
+
+<RequestExample>
+```bash cURL
+curl -X DELETE "https://api.pzpacks.com/modpacks/123e4567-e89b-12d3-a456-426614174000/mods/mod-uuid-1" \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "message": "Mod removed from modpack successfully"
+}
+```
+</ResponseExample>

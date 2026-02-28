@@ -1,0 +1,414 @@
+---
+title: Mod Browsing & Management
+description: Discover, add, and manage Project Zomboid mods in your modpacks
+icon: puzzle-piece
+---
+
+# Mod Browsing & Management
+
+PZ Packs maintains a comprehensive database of Project Zomboid mods from the Steam Workshop. Browse, search, and add mods to your modpacks with detailed metadata and automatic updates.
+
+## Browsing Mods
+
+The mod browser provides a searchable, filterable view of all available Project Zomboid mods in the PZ Packs database.
+
+### Accessing the Mod Browser
+
+1. Navigate to the "All Mods" page from the main navigation
+2. View mods in a grid layout with key information displayed on each card
+3. No authentication required to browse the mod catalog
+
+### Mod Display Information
+
+Each mod card shows:
+
+<CardGroup cols={2}>
+  <Card title="Basic Info" icon="info-circle">
+    - Mod name
+    - Mod avatar/thumbnail
+    - Steam Workshop ID
+    - Description preview
+  </Card>
+  
+  <Card title="Metadata" icon="tags">
+    - Tags and categories
+    - Required dependencies
+    - Map folders (if applicable)
+    - Last update timestamp
+  </Card>
+</CardGroup>
+
+## Searching and Filtering
+
+Find specific mods quickly using the built-in search and filter capabilities.
+
+### Search Options
+
+<Tabs>
+  <Tab title="Text Search">
+    Search mods by name or description:
+    
+    - Enter keywords in the search bar
+    - Search is case-insensitive
+    - Results update as you type
+    - Matches against mod names and descriptions
+  </Tab>
+  
+  <Tab title="Tag Filtering">
+    Filter mods by category tags:
+    
+    - Click on tag filters to narrow results
+    - Multiple tags can be selected
+    - Common tags include:
+      - Gameplay
+      - Building
+      - Vehicles
+      - Weapons
+      - Clothing
+      - Maps
+  </Tab>
+  
+  <Tab title="Sorting">
+    Sort the mod list by:
+    
+    - **Name** (A-Z or Z-A)
+    - **Recently Updated** (newest first)
+    - **Created Date** (newest or oldest)
+    
+    Toggle between ascending and descending order.
+  </Tab>
+</Tabs>
+
+### Pagination
+
+The mod browser displays mods in pages to improve performance:
+
+- Default: 20 mods per page
+- Navigate using the pagination controls at the bottom
+- Page numbers update based on active filters
+
+## Mod Metadata
+
+PZ Packs stores comprehensive metadata for each mod, synced from Steam Workshop.
+
+### Core Metadata Fields
+
+<AccordionGroup>
+  <Accordion title="Steam Workshop Information">
+    **Workshop ID** (required)
+    
+    The unique Steam Workshop identifier for the mod. This is used to:
+    - Download the mod from Steam
+    - Check for updates
+    - Link to the Steam Workshop page
+    
+    Example: `2876012699`
+  </Accordion>
+  
+  <Accordion title="Steam Mod IDs">
+    **Mod IDs** (array)
+    
+    Some mods contain multiple sub-mods or components. Each component has its own Steam Mod ID:
+    
+    ```json
+    "steamModId": [
+      "ModName1",
+      "ModName2",
+      "ModName3"
+    ]
+    ```
+    
+    These IDs appear in the `Mods=` line of server configuration files.
+  </Accordion>
+  
+  <Accordion title="Map Folders">
+    **Map Folders** (optional array)
+    
+    For mods that add custom maps, this field contains the map folder names:
+    
+    ```json
+    "mapFolders": [
+      "CustomMapName",
+      "AnotherMap"
+    ]
+    ```
+    
+    Map folders are included in the `Map=` line of server configs.
+  </Accordion>
+  
+  <Accordion title="Required Mods">
+    **Dependencies** (optional array)
+    
+    Lists other mods required for this mod to function:
+    
+    ```json
+    "requiredMods": [
+      "RequiredModWorkshopId1",
+      "RequiredModWorkshopId2"
+    ]
+    ```
+    
+    <Info>
+      PZ Packs displays required mods but does not automatically add dependencies to your modpack. You must manually add required mods.
+    </Info>
+  </Accordion>
+  
+  <Accordion title="Tags and Categorization">
+    **Tags** (array of tag references)
+    
+    Mods are categorized using tags for easier discovery:
+    - Tags are managed globally in the system
+    - Multiple tags can be assigned to each mod
+    - Used for filtering in the mod browser
+  </Accordion>
+  
+  <Accordion title="Descriptive Content">
+    - **Name**: The mod's display name
+    - **Description**: Full mod description from Steam
+    - **Highlights**: Key features or selling points
+    - **Avatar URL**: Thumbnail image from Steam Workshop
+    - **Steam URL**: Direct link to the Workshop page
+  </Accordion>
+</AccordionGroup>
+
+## Adding Mods to Modpacks
+
+Add mods to your modpack using Workshop IDs or Steam URLs.
+
+<Steps>
+  <Step title="Open Your Modpack">
+    Navigate to the modpack details page where you want to add mods.
+  </Step>
+  
+  <Step title="Click Add Mod">
+    Click the "Add Mod" button to open the add mod dialog.
+  </Step>
+  
+  <Step title="Enter Mod Information">
+    Provide either:
+    - **Workshop ID**: The numeric ID from the Steam Workshop URL
+    - **Steam URL**: The full Steam Workshop URL for the mod
+    
+    Examples:
+    - Workshop ID: `2876012699`
+    - Steam URL: `https://steamcommunity.com/sharedfiles/filedetails/?id=2876012699`
+  </Step>
+  
+  <Step title="Add the Mod">
+    Click "Add Mod" to add it to your modpack. The system will:
+    - Check if the mod exists in the PZ Packs database
+    - Fetch mod details from Steam if it's a new mod
+    - Add the mod to your modpack's mod list
+  </Step>
+</Steps>
+
+<Warning>
+  You need the **add-mod** permission to add mods to a modpack. Owners have this permission by default. See [Team Collaboration](/features/team-collaboration) for permission details.
+</Warning>
+
+### Automatic Mod Fetching
+
+When you add a mod that doesn't exist in the PZ Packs database:
+
+1. The system fetches mod information from Steam Workshop API
+2. Mod metadata is stored in the database for future use
+3. The mod becomes available in the global mod browser
+4. The mod is added to your modpack
+
+## Removing Mods from Modpacks
+
+Remove mods you no longer need from your modpack.
+
+1. Navigate to your modpack's mod list
+2. Find the mod you want to remove
+3. Click the remove/delete button on the mod card
+4. Confirm the removal in the dialog
+
+<Note>
+  Removing a mod from a modpack does **not** delete the mod from the PZ Packs database. It only removes the association between the mod and your modpack.
+</Note>
+
+### Permissions Required
+
+- **Owner**: Can remove any mod
+- **Members with remove-mod permission**: Can remove mods from the modpack
+
+See [Team Collaboration](/features/team-collaboration) for more on permissions.
+
+## Mod Configuration
+
+Some mods have multiple Steam Mod IDs. PZ Packs allows you to select which IDs to include in exports.
+
+### Selecting Steam Mod IDs
+
+When configuring your export settings:
+
+1. Open the "Reorder & Configure Export" view
+2. For mods with multiple Steam Mod IDs, you'll see checkboxes for each ID
+3. Select/deselect IDs to include in your server configuration export
+4. Save your configuration
+
+<Info>
+  By default, all Steam Mod IDs for a mod are selected. Deselecting all IDs for a mod will exclude it from the export entirely.
+</Info>
+
+### Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Modular Mods" icon="cubes">
+    Some large mods have optional components. Select only the components you need for your server.
+  </Card>
+  
+  <Card title="Compatibility" icon="check-circle">
+    Exclude specific mod components that conflict with other mods in your collection.
+  </Card>
+</CardGroup>
+
+## Updating Mod Information
+
+Mod information in PZ Packs is synced from Steam Workshop. Mods can be updated individually or in bulk.
+
+### Update Single Mod
+
+<Note>
+  Requires **update** permission (admin only by default).
+</Note>
+
+1. Navigate to the mod details page
+2. Click "Update Mod" or the refresh icon
+3. The system fetches the latest information from Steam Workshop
+4. Mod metadata is updated in the database
+
+### Update All Mods
+
+Administrators can trigger a bulk update of all mods in the database:
+
+1. Navigate to the "All Mods" page
+2. Click "Update All Mods" button (admin only)
+3. The system queues updates for all mods
+4. Mods are updated in the background
+
+<Warning>
+  Updating all mods can take significant time. This operation runs as a background job to avoid blocking the interface.
+</Warning>
+
+## Mod Detail View
+
+Click on any mod card to view comprehensive mod information.
+
+### Information Displayed
+
+<Tabs>
+  <Tab title="Overview">
+    - Full mod name and description
+    - Mod avatar/thumbnail
+    - Steam Workshop link
+    - Last updated timestamp
+    - Created date
+  </Tab>
+  
+  <Tab title="Technical Details">
+    - **Workshop ID**: For Steam downloads
+    - **Steam Mod IDs**: All component IDs (displayed in a list)
+    - **Map Folders**: Custom maps included
+    - **Required Mods**: Dependencies with links
+  </Tab>
+  
+  <Tab title="Categorization">
+    - **Tags**: All assigned category tags
+    - **Highlights**: Key features (if available)
+  </Tab>
+</Tabs>
+
+## Mod List in Modpacks
+
+When viewing a modpack, you'll see a list of all mods in that collection.
+
+### List Features
+
+- **Pagination**: Navigate through large mod lists
+- **Search**: Filter mods within the modpack
+- **Sorting**: Reorder based on various criteria
+- **Card View**: Each mod displayed with key information
+
+### Reordering Mods
+
+Set the load order for mods in your modpack:
+
+<Steps>
+  <Step title="Open Reorder Interface">
+    Click "Reorder Mods" or "Configure Export" from the modpack page.
+  </Step>
+  
+  <Step title="Drag and Drop">
+    Drag mod cards to reorder them. The top mod loads first.
+  </Step>
+  
+  <Step title="Use Quick Actions">
+    Use the arrow buttons to:
+    - Move mod up one position
+    - Move mod down one position
+    - Move mod to top
+    - Move mod to bottom
+  </Step>
+  
+  <Step title="Save Order">
+    Click "Save" to persist the mod load order.
+  </Step>
+</Steps>
+
+<Info>
+  The mod order is saved in the modpack metadata and used when generating server configuration files.
+</Info>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Mod Selection">
+    - Check mod compatibility before adding to your modpack
+    - Read mod descriptions carefully for known conflicts
+    - Test mods together before deploying to a server
+    - Keep track of required dependencies
+  </Accordion>
+  
+  <Accordion title="Load Order">
+    - Place framework/library mods first
+    - Group related mods together
+    - Put map mods after core gameplay mods
+    - Test the load order in single-player before using on servers
+  </Accordion>
+  
+  <Accordion title="Maintenance">
+    - Periodically check for mod updates
+    - Review mod compatibility when Project Zomboid updates
+    - Remove abandoned or broken mods
+    - Update mod descriptions if you notice changes
+  </Accordion>
+  
+  <Accordion title="Dependencies">
+    - Always add required mods to your modpack
+    - Check dependency versions for compatibility
+    - Note dependencies in your modpack description
+    - Test thoroughly when adding mods with complex dependencies
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Export Server Files" icon="download" href="/features/server-configuration">
+    Generate server configuration files with your selected mods
+  </Card>
+  
+  <Card title="Modpack Management" icon="box" href="/features/modpacks">
+    Learn more about organizing and managing modpacks
+  </Card>
+  
+  <Card title="Team Collaboration" icon="users" href="/features/team-collaboration">
+    Share modpack management with team members
+  </Card>
+  
+  <Card title="API Reference" icon="code" href="/api/mods">
+    Programmatically access mod data via API
+  </Card>
+</CardGroup>

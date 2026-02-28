@@ -1,0 +1,268 @@
+---
+title: 'Members'
+description: 'Manage modpack members and permissions'
+---
+
+## List Members
+
+<Api method="GET" url="/modpacks/:id/members" />
+
+List all members of a modpack with their permissions. No authentication required for public modpacks, authentication required for private modpacks.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  Modpack UUID
+</ParamField>
+
+### Response
+
+<ResponseField name="members" type="array">
+  <Expandable title="Member Object">
+    <ResponseField name="id" type="string">
+      Member record UUID
+    </ResponseField>
+    <ResponseField name="userId" type="string">
+      User UUID
+    </ResponseField>
+    <ResponseField name="modpackId" type="string">
+      Modpack UUID
+    </ResponseField>
+    <ResponseField name="permission" type="array">
+      Array of permission strings (e.g., ["read", "add-mod", "remove-mod"])
+    </ResponseField>
+    <ResponseField name="isActive" type="boolean">
+      Whether the membership is active
+    </ResponseField>
+    <ResponseField name="createdAt" type="string">
+      ISO 8601 timestamp
+    </ResponseField>
+    <ResponseField name="updatedAt" type="string">
+      ISO 8601 timestamp
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.pzpacks.com/modpacks/123e4567-e89b-12d3-a456-426614174000/members"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "members": [
+    {
+      "id": "member-record-uuid-1",
+      "userId": "user-uuid-1",
+      "modpackId": "123e4567-e89b-12d3-a456-426614174000",
+      "permission": ["read", "add-mod"],
+      "isActive": true,
+      "createdAt": "2024-01-15T10:30:00Z",
+      "updatedAt": "2024-01-15T10:30:00Z"
+    },
+    {
+      "id": "member-record-uuid-2",
+      "userId": "user-uuid-2",
+      "modpackId": "123e4567-e89b-12d3-a456-426614174000",
+      "permission": ["read"],
+      "isActive": true,
+      "createdAt": "2024-01-16T14:20:00Z",
+      "updatedAt": "2024-01-16T14:20:00Z"
+    }
+  ]
+}
+```
+
+```json Error Response
+{
+  "error": {
+    "message": "Modpack not found"
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Add Member
+
+<Api method="POST" url="/modpacks/:id/members" auth="bearer" />
+
+Add a member to the modpack by email address with specified permissions. Only the modpack owner can add members.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  Modpack UUID
+</ParamField>
+
+### Body Parameters
+
+<ParamField body="email" type="string" required>
+  Email address of the user to add (must be a valid email format)
+</ParamField>
+
+<ParamField body="permission" type="array" required>
+  Array of permission strings (minimum 1 permission required). Common permissions:
+  - `read` - View modpack
+  - `add-mod` - Add mods to modpack
+  - `remove-mod` - Remove mods from modpack
+  - `update` - Update modpack settings
+</ParamField>
+
+### Response
+
+<ResponseField name="id" type="string">
+  Member record UUID
+</ResponseField>
+
+<ResponseField name="userId" type="string">
+  User UUID
+</ResponseField>
+
+<ResponseField name="modpackId" type="string">
+  Modpack UUID
+</ResponseField>
+
+<ResponseField name="permission" type="array">
+  Array of granted permissions
+</ResponseField>
+
+<ResponseField name="isActive" type="boolean">
+  Membership active status
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.pzpacks.com/modpacks/123e4567-e89b-12d3-a456-426614174000/members" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "permission": ["read", "add-mod"]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "id": "member-record-uuid-3",
+  "userId": "user-uuid-3",
+  "modpackId": "123e4567-e89b-12d3-a456-426614174000",
+  "permission": ["read", "add-mod"],
+  "isActive": true,
+  "createdAt": "2024-01-17T09:30:00Z",
+  "updatedAt": "2024-01-17T09:30:00Z"
+}
+```
+
+```json Error Response
+{
+  "error": {
+    "message": "Invalid email format"
+  }
+}
+```
+
+```json Error Response
+{
+  "error": {
+    "message": "User with this email not found"
+  }
+}
+```
+
+```json Error Response
+{
+  "error": {
+    "message": "You do not have permission to manage members"
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Remove Member
+
+<Api method="DELETE" url="/modpacks/:id/members" auth="bearer" />
+
+Remove a member from the modpack by their email address. Only the modpack owner can remove members.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  Modpack UUID
+</ParamField>
+
+### Body Parameters
+
+<ParamField body="email" type="string" required>
+  Email address of the member to remove (must be a valid email format)
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X DELETE "https://api.pzpacks.com/modpacks/123e4567-e89b-12d3-a456-426614174000/members" \
+  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com"
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "message": "Member removed successfully"
+}
+```
+
+```json Error Response
+{
+  "error": {
+    "message": "Invalid email format"
+  }
+}
+```
+
+```json Error Response
+{
+  "error": {
+    "message": "Member not found"
+  }
+}
+```
+
+```json Error Response
+{
+  "error": {
+    "message": "You do not have permission to manage members"
+  }
+}
+```
+</ResponseExample>
+
+## Permission Types
+
+When adding members to a modpack, you can grant the following permissions:
+
+- **read** - View the modpack and its mods
+- **add-mod** - Add mods to the modpack
+- **remove-mod** - Remove mods from the modpack  
+- **update** - Update modpack settings (name, description, etc.)
+- **manager-members** - Add and remove other members
+- **export** - Generate and download server files
+- **import** - Import mods from Steam collections
+
+The modpack owner automatically has all permissions and cannot be removed as a member.

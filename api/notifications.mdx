@@ -1,0 +1,195 @@
+---
+title: 'Notifications'
+description: 'Manage user notifications'
+---
+
+## List Notifications
+
+<Api method="GET" url="/notifications" auth="bearer" />
+
+List all notifications for the authenticated user, including unread and read notifications.
+
+### Response
+
+<ResponseField name="notifications" type="array">
+  <Expandable title="Notification Object">
+    <ResponseField name="id" type="string">
+      Notification UUID
+    </ResponseField>
+    <ResponseField name="userId" type="string">
+      User UUID
+    </ResponseField>
+    <ResponseField name="title" type="string">
+      Notification title
+    </ResponseField>
+    <ResponseField name="content" type="string">
+      Notification content/message
+    </ResponseField>
+    <ResponseField name="type" type="string">
+      Notification type: `info`, `success`, `warning`, or `error`
+    </ResponseField>
+    <ResponseField name="isRead" type="boolean">
+      Whether the notification has been read
+    </ResponseField>
+    <ResponseField name="metadata" type="string">
+      Optional metadata (JSON string)
+    </ResponseField>
+    <ResponseField name="createdAt" type="string">
+      ISO 8601 timestamp
+    </ResponseField>
+    <ResponseField name="updatedAt" type="string">
+      ISO 8601 timestamp
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.pzpacks.com/notifications" \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "notifications": [
+    {
+      "id": "notification-uuid-1",
+      "userId": "user-uuid-1",
+      "title": "Modpack Import Completed",
+      "content": "Your Steam Workshop import for 'Zombie Survival Pack' has completed successfully. 25 mods were added.",
+      "type": "success",
+      "isRead": false,
+      "metadata": "{\"modpackId\":\"123e4567-e89b-12d3-a456-426614174000\",\"modsImported\":25}",
+      "createdAt": "2024-01-17T10:30:00Z",
+      "updatedAt": "2024-01-17T10:30:00Z"
+    },
+    {
+      "id": "notification-uuid-2",
+      "userId": "user-uuid-1",
+      "title": "Server File Ready",
+      "content": "Your server configuration file for 'My Survival Pack' is ready to download.",
+      "type": "info",
+      "isRead": true,
+      "metadata": "{\"modpackId\":\"987fcdeb-51a2-43c1-9876-543210fedcba\",\"exportId\":\"export-uuid-here\"}",
+      "createdAt": "2024-01-16T14:20:00Z",
+      "updatedAt": "2024-01-17T09:00:00Z"
+    },
+    {
+      "id": "notification-uuid-3",
+      "userId": "user-uuid-1",
+      "title": "Import Failed",
+      "content": "Failed to import mods from Steam Workshop. The collection may be private or unavailable.",
+      "type": "error",
+      "isRead": true,
+      "metadata": "{\"modpackId\":\"abc-def-123\"}",
+      "createdAt": "2024-01-15T16:45:00Z",
+      "updatedAt": "2024-01-16T08:00:00Z"
+    }
+  ]
+}
+```
+</ResponseExample>
+
+---
+
+## Mark Notification as Read
+
+<Api method="PATCH" url="/notifications/:id/read" auth="bearer" />
+
+Mark a specific notification as read. Only the notification owner can mark it as read.
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  Notification UUID
+</ParamField>
+
+### Response
+
+<ResponseField name="id" type="string">
+  Notification UUID
+</ResponseField>
+
+<ResponseField name="isRead" type="boolean">
+  Updated read status (will be `true`)
+</ResponseField>
+
+<ResponseField name="updatedAt" type="string">
+  ISO 8601 timestamp of when it was marked as read
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X PATCH "https://api.pzpacks.com/notifications/notification-uuid-1/read" \
+  -H "Authorization: Bearer YOUR_API_TOKEN"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Success Response
+{
+  "id": "notification-uuid-1",
+  "userId": "user-uuid-1",
+  "title": "Modpack Import Completed",
+  "content": "Your Steam Workshop import for 'Zombie Survival Pack' has completed successfully. 25 mods were added.",
+  "type": "success",
+  "isRead": true,
+  "metadata": "{\"modpackId\":\"123e4567-e89b-12d3-a456-426614174000\",\"modsImported\":25}",
+  "createdAt": "2024-01-17T10:30:00Z",
+  "updatedAt": "2024-01-17T11:00:00Z"
+}
+```
+
+```json Error Response
+{
+  "error": {
+    "message": "Notification not found"
+  }
+}
+```
+
+```json Error Response
+{
+  "error": {
+    "message": "You do not have permission to update this notification"
+  }
+}
+```
+</ResponseExample>
+
+## Notification Types
+
+Notifications are categorized by type to help you filter and display them appropriately:
+
+- **info** - General informational messages (e.g., "Server file ready")
+- **success** - Success messages (e.g., "Import completed successfully")
+- **warning** - Warning messages (e.g., "Some mods failed to import")
+- **error** - Error messages (e.g., "Import failed")
+
+## Common Notification Scenarios
+
+### Modpack Import
+When you import mods from a Steam Workshop collection, you'll receive notifications about:
+- Import started
+- Import completed with number of mods added
+- Import failed with error details
+
+### Server File Generation
+When you request a server configuration file, you'll receive notifications about:
+- Generation started
+- File ready for download
+- Generation failed
+
+### Modpack Sharing
+When someone shares a modpack with you or adds you as a member:
+- Added as member notification
+- Permission changes
+- Removed as member
+
+### Mod Updates
+When mods in your modpacks are updated:
+- Mod update available
+- Breaking changes detected
+- Mod deprecated or removed from Workshop

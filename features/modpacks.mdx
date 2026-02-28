@@ -1,0 +1,247 @@
+---
+title: Modpack Management
+description: Create, organize, and manage your Project Zomboid modpack collections
+icon: box
+---
+
+# Modpack Management
+
+Modpacks in PZ Packs allow you to create, organize, and share curated collections of Project Zomboid mods. Whether you're managing mods for a private server or sharing your collection with the community, modpacks provide a centralized way to organize your mod setup.
+
+## Creating a Modpack
+
+Create a new modpack from your dashboard to start organizing your mod collection.
+
+<Steps>
+  <Step title="Navigate to My Modpacks">
+    From your dashboard, click on "My Modpacks" to view all your modpack collections.
+  </Step>
+  
+  <Step title="Create New Modpack">
+    Click the "Create Modpack" button to open the creation dialog.
+  </Step>
+  
+  <Step title="Fill in Modpack Details">
+    Provide the following information:
+    - **Name** (required): A descriptive name for your modpack
+    - **Description** (optional): Details about what mods are included and the purpose
+    - **Avatar URL** (optional): A square image (recommended 1024x1024px) to represent your modpack
+    - **Steam Workshop URL** (optional): Link to your Steam Workshop collection for reference
+  </Step>
+  
+  <Step title="Save Your Modpack">
+    Click "Create" to save your new modpack. You'll be redirected to the modpack details page.
+  </Step>
+</Steps>
+
+<Info>
+  New modpacks are created as **private** by default. You can make them public later through the modpack settings.
+</Info>
+
+## Updating Modpack Information
+
+You can update your modpack's metadata at any time if you're the owner.
+
+### Editable Fields
+
+<AccordionGroup>
+  <Accordion title="Basic Information">
+    - **Name**: Update the modpack title
+    - **Description**: Modify or add details about your collection
+    - **Avatar URL**: Change the modpack's visual representation
+    - **Steam URL**: Update or add a Steam Workshop collection link
+  </Accordion>
+  
+  <Accordion title="Visibility Settings">
+    **Public/Private Toggle**
+    
+    - **Private**: Only you and invited members can view and access the modpack
+    - **Public**: Anyone can view the modpack and its mod list (appears in public modpack listings)
+    
+    <Note>
+      Changing a modpack to public makes it discoverable by the community. Members you've added will retain their permissions regardless of visibility.
+    </Note>
+  </Accordion>
+</AccordionGroup>
+
+### How to Update
+
+1. Open your modpack details page
+2. Click the "Edit Modpack" or settings icon
+3. Modify the desired fields
+4. Toggle the "Public" switch to change visibility
+5. Click "Save" to apply changes
+
+## Modpack Metadata and Ordering
+
+PZ Packs stores advanced configuration metadata for each modpack to ensure proper mod load order and export configuration.
+
+### Mod Load Order
+
+The order in which mods load can affect game stability and functionality. PZ Packs allows you to customize this order:
+
+<CardGroup cols={2}>
+  <Card title="Reorder Mods" icon="arrows-up-down">
+    Drag and drop mods to set the exact load order for your modpack. This order is preserved when exporting server files.
+  </Card>
+  
+  <Card title="Export Configuration" icon="gear">
+    Save custom mod ordering and Steam Mod ID selections per user, allowing different team members to maintain their own export preferences.
+  </Card>
+</CardGroup>
+
+### Metadata Structure
+
+Each modpack stores the following metadata:
+
+```json
+{
+  "modsOrder": [
+    "mod-uuid-1",
+    "mod-uuid-2",
+    "mod-uuid-3"
+  ],
+  "modConfig": {
+    "mod-uuid-1": {
+      "selectedSteamModIds": ["workshopid1", "workshopid2"]
+    }
+  }
+}
+```
+
+<Info>
+  **Export configurations** can be saved per user, allowing team members to maintain individual preferences while working on the same modpack.
+</Info>
+
+## Importing from Steam Collections
+
+Quickly populate your modpack by importing an existing Steam Workshop collection.
+
+<Steps>
+  <Step title="Get Steam Collection URL">
+    Navigate to your Steam Workshop collection and copy the full URL from your browser.
+    
+    Example: `https://steamcommunity.com/sharedfiles/filedetails/?id=123456789`
+  </Step>
+  
+  <Step title="Open Import Dialog">
+    From your modpack details page, click "Import from Steam" or the import button.
+  </Step>
+  
+  <Step title="Paste Collection URL">
+    Enter the Steam Collection URL in the input field.
+  </Step>
+  
+  <Step title="Start Import">
+    Click "Import Modpack" to begin the import process. The system will:
+    - Fetch all mods from the Steam collection
+    - Add them to your modpack
+    - Retrieve mod metadata from Steam Workshop
+  </Step>
+  
+  <Step title="Monitor Progress">
+    The import runs as a background job. You can check the import status from the modpack page.
+  </Step>
+</Steps>
+
+<Warning>
+  Importing from Steam can take several minutes depending on the collection size. The import process runs in the background, so you can continue using PZ Packs while it completes.
+</Warning>
+
+### Import Status
+
+The import job has three possible states:
+- **Pending**: Import is queued or in progress
+- **Completed**: All mods successfully imported
+- **Failed**: An error occurred during import (check for invalid Steam URLs or private collections)
+
+## Archiving Modpacks
+
+When you no longer need a modpack, you can archive it instead of permanently deleting it. This is a soft delete that preserves data.
+
+### Archive Process
+
+1. Navigate to the modpack you want to archive
+2. Click the "Archive" or delete button
+3. Confirm the archival in the dialog
+
+<Note>
+  **Owner-only action**: Only the modpack owner can archive a modpack. Archived modpacks are marked as inactive (`isActive: false`) but remain in the database.
+</Note>
+
+### What Happens When Archived
+
+- The modpack is hidden from your modpack list
+- Members lose access to the modpack
+- The modpack is removed from public listings (if it was public)
+- All mod associations and member data are preserved
+
+<Info>
+  Archived modpacks are not permanently deleted. Contact support if you need to restore an archived modpack.
+</Info>
+
+## Modpack Verification
+
+Verified modpacks receive a special badge and appear more prominently in public listings.
+
+<Card title="Verified Badge" icon="badge-check">
+  Modpacks can be verified by administrators to indicate:
+  - High-quality, well-maintained collections
+  - Official or community-endorsed modpacks
+  - Thoroughly tested mod combinations
+</Card>
+
+<Note>
+  Verification is managed by PZ Packs administrators. If you believe your modpack should be verified, contact the support team.
+</Note>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Naming Conventions">
+    - Use descriptive names that indicate the modpack's purpose (e.g., "Hardcore Survival", "Building & Furniture Expansion")
+    - Keep names concise but informative
+    - Avoid special characters that might cause issues with file systems
+  </Accordion>
+  
+  <Accordion title="Description Guidelines">
+    - List the main mod categories or features
+    - Mention compatibility (Build 41 vs 42)
+    - Note any special configuration requirements
+    - Include server settings recommendations if applicable
+  </Accordion>
+  
+  <Accordion title="Avatar Images">
+    - Use square images (1:1 aspect ratio)
+    - Recommended resolution: 1024x1024px
+    - Host images on reliable CDNs or image hosting services
+    - Ensure the URL is publicly accessible
+  </Accordion>
+  
+  <Accordion title="Mod Organization">
+    - Group related mods together
+    - Place core/framework mods at the top of the load order
+    - Test the load order before sharing with team members
+    - Document any known conflicts in the description
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Add Mods" icon="plus" href="/features/mods">
+    Learn how to browse, search, and add mods to your modpack
+  </Card>
+  
+  <Card title="Export Server Files" icon="download" href="/features/server-configuration">
+    Generate server configuration files for your modpack
+  </Card>
+  
+  <Card title="Team Collaboration" icon="users" href="/features/team-collaboration">
+    Invite members and manage permissions for collaborative modpack management
+  </Card>
+  
+  <Card title="API Reference" icon="code" href="/api/modpacks">
+    Integrate modpack management into your own applications
+  </Card>
+</CardGroup>

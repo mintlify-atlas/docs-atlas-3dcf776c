@@ -1,0 +1,572 @@
+---
+title: Team Collaboration
+description: Share modpacks and manage team member permissions
+icon: users
+---
+
+# Team Collaboration
+
+PZ Packs supports collaborative modpack management through a flexible team member system. Add team members to your modpacks, assign granular permissions, and work together to maintain your mod collections.
+
+## Overview
+
+Collaboration features allow multiple users to work on the same modpack with different levels of access control.
+
+<CardGroup cols={2}>
+  <Card title="Email-Based Invites" icon="envelope">
+    Add team members using their email address - they must have a PZ Packs account.
+  </Card>
+  
+  <Card title="Granular Permissions" icon="shield-check">
+    Control exactly what each member can do with fine-grained permission settings.
+  </Card>
+  
+  <Card title="Owner Controls" icon="crown">
+    Modpack owners have full control and can manage all members and permissions.
+  </Card>
+  
+  <Card title="Member Tracking" icon="list">
+    View all members, their permissions, and when they were added to the modpack.
+  </Card>
+</CardGroup>
+
+## Adding Team Members
+
+Invite users to collaborate on your modpack.
+
+<Steps>
+  <Step title="Open Your Modpack">
+    Navigate to the modpack details page for the modpack you want to share.
+  </Step>
+  
+  <Step title="Access Members Section">
+    Click on "Members" or the team icon to view the members list.
+  </Step>
+  
+  <Step title="Click Add Member">
+    Click the "Add Member" button to open the invitation dialog.
+  </Step>
+  
+  <Step title="Enter Email Address">
+    Type the email address of the user you want to add.
+    
+    <Info>
+      The user must already have a PZ Packs account with this email address.
+    </Info>
+  </Step>
+  
+  <Step title="Assign Permissions">
+    Select which permissions to grant the new member (see Permission System below).
+  </Step>
+  
+  <Step title="Send Invitation">
+    Click "Add Member" to add them to the modpack.
+  </Step>
+</Steps>
+
+### Requirements
+
+<Note>
+  Only the **modpack owner** can add members. The `manager-members` permission is required, which is exclusive to owners.
+</Note>
+
+- The invitee must have an active PZ Packs account
+- The email must exactly match their account email
+- You cannot add the same user twice to a modpack
+
+## Removing Team Members
+
+Remove members who no longer need access to the modpack.
+
+<Steps>
+  <Step title="View Members List">
+    Navigate to the members section of your modpack.
+  </Step>
+  
+  <Step title="Select Member to Remove">
+    Find the member you want to remove from the list.
+  </Step>
+  
+  <Step title="Click Remove">
+    Click the remove button next to their name.
+  </Step>
+  
+  <Step title="Confirm Removal">
+    Confirm the removal in the dialog box.
+  </Step>
+</Steps>
+
+<Warning>
+  Removing a member immediately revokes their access to the modpack. They will no longer be able to view or modify it unless they are re-added.
+</Warning>
+
+### Removal Notes
+
+- Members are soft-deleted (marked as `isActive: false`)
+- Member records are preserved in the database for audit purposes
+- You cannot remove yourself if you're the owner
+- Only owners can remove members
+
+## Permission System
+
+PZ Packs uses a granular permission system to control what team members can do.
+
+### Available Permissions
+
+Permissions are stored as an array of action strings. Here are the permissions available in PZ Packs:
+
+<AccordionGroup>
+  <Accordion title="Read" icon="eye">
+    **Permission**: `read`
+    
+    **Allows**:
+    - View the modpack details
+    - See the modpack in "My Modpacks" list
+    - Access modpack information
+    
+    **Required for**: Basic access to a private modpack
+    
+    <Note>
+      All members automatically receive the `read` permission when added.
+    </Note>
+  </Accordion>
+  
+  <Accordion title="Update" icon="pen">
+    **Permission**: `update`
+    
+    **Allows**:
+    - Edit modpack name and description
+    - Update avatar URL and Steam URL
+    - Change public/private visibility
+    
+    **Required for**: Modifying modpack metadata
+    
+    <Warning>
+      Granting `update` permission allows members to make the modpack public or private.
+    </Warning>
+  </Accordion>
+  
+  <Accordion title="Add Mod" icon="plus">
+    **Permission**: `add-mod`
+    
+    **Allows**:
+    - Add new mods to the modpack by Workshop ID or Steam URL
+    - Trigger fetching of mod information from Steam
+    
+    **Required for**: Growing the modpack's mod collection
+  </Accordion>
+  
+  <Accordion title="Remove Mod" icon="minus">
+    **Permission**: `remove-mod`
+    
+    **Allows**:
+    - Remove mods from the modpack
+    - Clean up unwanted or conflicting mods
+    
+    **Required for**: Curating the mod list
+    
+    <Info>
+      Removing a mod only removes it from the modpack, not from the PZ Packs database.
+    </Info>
+  </Accordion>
+  
+  <Accordion title="Import" icon="file-import">
+    **Permission**: `import`
+    
+    **Allows**:
+    - Import mods from Steam Collections
+    - Check import job status
+    
+    **Required for**: Bulk adding mods via Steam Collection import
+  </Accordion>
+  
+  <Accordion title="Export" icon="download">
+    **Permission**: `export`
+    
+    **Allows**:
+    - Request server file generation
+    - Download generated server configuration files
+    - View export configuration
+    
+    **Required for**: Generating server configuration files
+  </Accordion>
+  
+  <Accordion title="Archive" icon="trash">
+    **Permission**: `archive`
+    
+    **Allows**:
+    - Archive (soft delete) the modpack
+    
+    **Required for**: Removing the modpack from active use
+    
+    <Warning>
+      This is a destructive action. Only grant this permission to trusted team members.
+    </Warning>
+  </Accordion>
+  
+  <Accordion title="Manage Members" icon="users-gear">
+    **Permission**: `manager-members`
+    
+    **Allows**:
+    - Add new members to the modpack
+    - Remove existing members
+    - View member list
+    
+    **Required for**: Team management
+    
+    <Note>
+      This permission is **owner-only** and cannot be granted to regular members. Only the modpack owner can manage members.
+    </Note>
+  </Accordion>
+</AccordionGroup>
+
+### Permission Assignment
+
+When adding a member, you can select which permissions they receive:
+
+```typescript
+// Example permission array for a member
+permission: [
+  "read",
+  "add-mod",
+  "remove-mod",
+  "export"
+]
+```
+
+### Default Permission Sets
+
+While PZ Packs allows custom permission combinations, here are some common permission sets:
+
+<Tabs>
+  <Tab title="Viewer">
+    **Permissions**: `["read"]`
+    
+    Can only view the modpack and its mods. Cannot make changes.
+    
+    **Use case**: Sharing modpack information without allowing modifications.
+  </Tab>
+  
+  <Tab title="Contributor">
+    **Permissions**: `["read", "add-mod", "remove-mod"]`
+    
+    Can view and manage mods but cannot change modpack settings.
+    
+    **Use case**: Team members who curate the mod list.
+  </Tab>
+  
+  <Tab title="Editor">
+    **Permissions**: `["read", "update", "add-mod", "remove-mod", "export"]`
+    
+    Can manage mods, update modpack details, and export configurations.
+    
+    **Use case**: Trusted collaborators who maintain the modpack.
+  </Tab>
+  
+  <Tab title="Full Access">
+    **Permissions**: `["read", "update", "add-mod", "remove-mod", "import", "export", "archive"]`
+    
+    Can do everything except manage members.
+    
+    **Use case**: Co-maintainers who need nearly full control.
+    
+    <Note>
+      Even with all permissions, members cannot add or remove other members. That's owner-only.
+    </Note>
+  </Tab>
+</Tabs>
+
+## Member Roles
+
+While PZ Packs doesn't have formal "roles," there are two functional levels:
+
+<CardGroup cols={2}>
+  <Card title="Owner" icon="crown">
+    - One owner per modpack
+    - Cannot be changed or transferred
+    - Has all permissions automatically
+    - Can manage members
+    - Can archive the modpack
+    
+    The owner is the user who created the modpack.
+  </Card>
+  
+  <Card title="Member" icon="user">
+    - Multiple members allowed
+    - Permissions assigned individually
+    - Cannot manage other members
+    - Can be removed by owner
+    - Access controlled by permission array
+    
+    Members are users added by the owner.
+  </Card>
+</CardGroup>
+
+## Viewing Members
+
+See who has access to your modpack and what they can do.
+
+### Member List Display
+
+The members section shows:
+
+- **Member avatar**: Profile picture (if set)
+- **Name**: Display name or email
+- **Permissions**: What actions they can perform
+- **Added date**: When they were added to the modpack
+- **Status**: Active or inactive
+
+### Member Avatars
+
+Members are displayed with avatar buttons that show:
+- Profile picture thumbnail
+- Tooltip with full name and email
+- Visual indication of member count
+
+<Info>
+  If there are more members than can be displayed, a "Show Remaining" option appears to view the full list.
+</Info>
+
+## Access Control Flow
+
+How permissions are checked when members perform actions:
+
+<Steps>
+  <Step title="User Requests Action">
+    A member attempts to perform an action (e.g., add a mod).
+  </Step>
+  
+  <Step title="Authentication Check">
+    The system verifies the user is logged in and has an active session.
+  </Step>
+  
+  <Step title="Ownership Check">
+    If the user is the modpack owner, they automatically have all permissions. Process ends here.
+  </Step>
+  
+  <Step title="Membership Check">
+    The system checks if the user is a member of the modpack and if their membership is active (`isActive: true`).
+  </Step>
+  
+  <Step title="Permission Check">
+    The system verifies the required permission is in the member's permission array.
+  </Step>
+  
+  <Step title="Action Allowed or Denied">
+    - If all checks pass: Action is allowed
+    - If any check fails: Action is denied with appropriate error message
+  </Step>
+</Steps>
+
+### Permission Enforcement
+
+Permissions are enforced at multiple levels:
+
+1. **API Routes**: Server-side permission checks before executing actions
+2. **UI Components**: Buttons and features are hidden if user lacks permission
+3. **Database Queries**: User context filters data access
+
+<Warning>
+  UI hiding is not a security measure - permissions are always enforced server-side. The UI simply provides a better user experience by hiding unavailable options.
+</Warning>
+
+## Sharing Modpacks
+
+While PZ Packs doesn't have a "share link" feature, there are several ways to share modpacks:
+
+### Public Modpacks
+
+<Steps>
+  <Step title="Make Modpack Public">
+    Edit your modpack and toggle the "Public" switch to on.
+  </Step>
+  
+  <Step title="Share the URL">
+    Copy your browser's URL from the modpack page and share it.
+    
+    Example: `https://pzpacks.com/modpacks/abc-123`
+  </Step>
+  
+  <Step title="Others Can View">
+    Anyone with the link can view the modpack, its mods, and export server files (if authenticated).
+  </Step>
+</Steps>
+
+### Private Modpacks with Members
+
+<Steps>
+  <Step title="Keep Modpack Private">
+    Do not enable the "Public" setting.
+  </Step>
+  
+  <Step title="Add Members">
+    Add specific users as members with appropriate permissions.
+  </Step>
+  
+  <Step title="Members Get Access">
+    Members can view and interact with the modpack based on their permissions.
+  </Step>
+</Steps>
+
+<Info>
+  Public modpacks appear in the public modpack listings and can be discovered by anyone. Private modpacks only appear to the owner and members.
+</Info>
+
+## Use Cases
+
+<AccordionGroup>
+  <Accordion title="Server Administration Team">
+    **Scenario**: Multiple admins manage a game server's mod collection.
+    
+    **Setup**:
+    - Owner: Server owner or head admin
+    - Members: Co-admins with `read`, `add-mod`, `remove-mod`, `export` permissions
+    
+    **Benefits**:
+    - Multiple people can update the mod list
+    - All admins can export server configs
+    - Central owner maintains control
+  </Accordion>
+  
+  <Accordion title="Mod Collection Curators">
+    **Scenario**: A team curates a public modpack for community use.
+    
+    **Setup**:
+    - Owner: Lead curator
+    - Members: Contributing curators with `read`, `add-mod`, `remove-mod`
+    - Public: Enabled for community access
+    
+    **Benefits**:
+    - Multiple curators collaborate on the collection
+    - Community can view and use the modpack
+    - Quality control maintained by owner
+  </Accordion>
+  
+  <Accordion title="Development and Testing">
+    **Scenario**: Developers test mod compatibility in a shared environment.
+    
+    **Setup**:
+    - Owner: Lead developer
+    - Members: Testers with `read`, `export` permissions
+    
+    **Benefits**:
+    - Testers can export and test configurations
+    - Lead developer controls mod list
+    - Prevents accidental changes during testing
+  </Accordion>
+  
+  <Accordion title="Read-Only Sharing">
+    **Scenario**: Share a modpack configuration without allowing changes.
+    
+    **Setup**:
+    - Owner: Modpack creator
+    - Members: Viewers with only `read` permission
+    - Alternative: Make modpack public
+    
+    **Benefits**:
+    - Others can see the mod list
+    - No risk of accidental modifications
+    - Owner maintains full control
+  </Accordion>
+</AccordionGroup>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Permission Assignment">
+    - Start with minimal permissions and add more as needed
+    - Document why each member has specific permissions
+    - Review permissions periodically
+    - Remove inactive members promptly
+    - Reserve `archive` permission for fully trusted members only
+  </Accordion>
+  
+  <Accordion title="Team Communication">
+    - Establish guidelines for modpack changes
+    - Use external tools (Discord, Slack) for coordination
+    - Document major mod additions/removals
+    - Coordinate before making significant changes
+    - Test changes before deploying to production servers
+  </Accordion>
+  
+  <Accordion title="Member Management">
+    - Keep the member list up to date
+    - Remove members when they leave the team
+    - Use descriptive member names/emails for easy identification
+    - Periodically audit who has access
+    - Have a backup owner contact for emergencies
+  </Accordion>
+  
+  <Accordion title="Export Configurations">
+    - Allow members to maintain their own export configs
+    - Document the "official" export configuration
+    - Test exports before deploying to servers
+    - Keep a record of working configurations
+    - Coordinate export changes with the team
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Cannot Add Member">
+    **Error**: "User not found" or "Invalid email"
+    
+    **Solutions**:
+    - Verify the user has a PZ Packs account
+    - Check email spelling and case
+    - Ensure you're using the email they registered with
+    - Ask the user to confirm their account email
+  </Accordion>
+  
+  <Accordion title="Member Can't Perform Action">
+    **Error**: "Permission denied" or action button is hidden
+    
+    **Solutions**:
+    - Check the member's permission array
+    - Verify the required permission is granted
+    - Ensure the member's account is still active
+    - Check if they're logged in with the correct account
+  </Accordion>
+  
+  <Accordion title="Duplicate Member Error">
+    **Error**: "Member already exists"
+    
+    **Solutions**:
+    - Check if the user is already in the member list
+    - Look for inactive members (soft-deleted)
+    - Contact support if you need to reactivate a removed member
+  </Accordion>
+</AccordionGroup>
+
+## Limitations
+
+<Note>
+  Current limitations of the team collaboration system:
+  
+  - No role templates or presets (permissions are manually assigned)
+  - Cannot transfer ownership of a modpack
+  - No notification system for modpack changes
+  - Member activity is not tracked in the UI
+  - No "pending invitation" state (users must have accounts first)
+</Note>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Modpack Management" icon="box" href="/features/modpacks">
+    Learn how to create and organize modpacks
+  </Card>
+  
+  <Card title="Server Configuration" icon="download" href="/features/server-configuration">
+    Export server files with team member configurations
+  </Card>
+  
+  <Card title="Mods" icon="puzzle-piece" href="/features/mods">
+    Add and manage mods collaboratively
+  </Card>
+  
+  <Card title="API Reference" icon="code" href="/api/members">
+    Programmatically manage members via API
+  </Card>
+</CardGroup>
